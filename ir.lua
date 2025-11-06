@@ -41,8 +41,8 @@ function IRVisitor:next_global(size)
     return self.global
 end
 
-function IRVisitor:sizeof(type)
-    return self.types[type]
+function IRVisitor:sizeof(type_specifier)
+    return type_specifier.indirection_level > 0 and 1 or self.types[type_specifier.value]
 end
 
 function IRVisitor:generate_ir_code(ast)
@@ -79,7 +79,7 @@ function IRVisitor:generate_ir_code(ast)
             emit_expression(n.value)
             -- find source from expression node
             -- an expression will always return a temporary value 
-            n.place = operand.g(self:sizeof(n.type_specifier.value))
+            n.place = operand.g(self:sizeof(n.type_specifier))
             if(n.place.type == "i" or n.place.type == "g") then
                 -- copy immediate to register first
                 n.value.place = load_operand_into_register(n.value.place)
@@ -137,7 +137,7 @@ function IRVisitor:generate_ir_code(ast)
     function emit_local_declaration(n)
         emit_expression(n.value)
 
-        n.place = operand.l(self:sizeof(n.type_specifier.value))
+        n.place = operand.l(self:sizeof(n.type_specifier))
         if((memory_operands[n.value.place.type] or n.value.place.type == "i")) then
             n.value.place = load_operand_into_register(n.value.place)
         end
@@ -151,7 +151,13 @@ function IRVisitor:generate_ir_code(ast)
         if((n.value.place.type == "i" or memory_operands[n.value.place.type])) then
             n.value.place = load_operand_into_register(n.value.place)
         end
-        table.insert(tac[method.id], {type="st", source=n.value.place, dest=symbol_table[n.id.id].place})
+        if(n.indirection_level) then
+            local temp = operand.t()
+            table.insert(tac[method.id], {type="ld", source=symbol_table[n.id.id].place, dest=temp.place})
+            table.insert(tac[method.id], {type="st", source=n.value.place, dest=temp.place})
+        else
+            table.insert(tac[method.id], {type="st", source=n.value.place, dest=symbol_table[n.id.id].place})
+        end
     end
 
 
@@ -243,6 +249,13 @@ function IRVisitor:generate_ir_code(ast)
             emit_function_call(n.value)
             n.place = operand.t()
             table.insert(tac[method.id], {type="mov", source=self.RETURN_REG, dest=n.place})
+        elseif(n.value.type == NODE_TYPES["ADDRESS_OF"]) then
+            n.place = operand.t()
+            table.insert(tac[method.id], {type="!get_address", target=symbol_table[n.value.id], dest=n.place})
+        elseif(n.value.type == NODE_TYPES["DEREFERENCE"]) then
+            n.place = operand.t()
+            table.insert(tac[method.id], {type="ld", source=symbol_table[n.value.id].place, dest=n.place})
+            table.insert(tac[method.id], {type="ld", source=n.place, dest=n.place})
         else
             -- expression
             emit_expression(n.value)

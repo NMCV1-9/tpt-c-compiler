@@ -51,37 +51,19 @@ start:
 	mov r5, 8
 	st r5, 2047
 	jmp main
-fib:
-	sub stack_pointer, 0
-	push base_pointer
-	mov base_pointer, stack_pointer
-	ld r1, base_pointer, 2
-	call print_num
-	ld r8, base_pointer, 2
-	ld r9, base_pointer, 3
-	add r8, r9
-	push r8
-	ld r10, base_pointer, 3
-	push r10
-	call fib
-	add stack_pointer, 2
-.exit_fib:
-	pop base_pointer
-	add stack_pointer, 0
-	ret
 main:
-	sub stack_pointer, 0
+	sub stack_pointer, 1
 	push base_pointer
 	mov base_pointer, stack_pointer
-	mov r6, 1
-	push r6
-	mov r7, 0
-	push r7
-	call fib
-	add stack_pointer, 2
+	mov r6, 2047
+	st r6, base_pointer, 1
+	ld r7, base_pointer, 1
+	ld r7, r7
+	mov r1, r7
+	call print_num
 .exit_main:
 	pop base_pointer
-	add stack_pointer, 0
+	add stack_pointer, 1
 	hlt
 print_num:
 	test r1, r1

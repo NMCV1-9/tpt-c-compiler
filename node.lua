@@ -22,7 +22,9 @@ Node.INVERTED_NODE_TYPES = {
     "IF",
     "FOR",
     "WHILE",
-    "RETURN"
+    "RETURN",
+    "ADDRESS_OF",
+    "DEREFERENCE"
 }
 
 

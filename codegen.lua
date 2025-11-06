@@ -39,16 +39,28 @@ function CodeGen.as_reg(operand)
     end
 end
 
+function CodeGen:emit_get_address(symbol, dest)
+    reg = CodeGen.as_reg(dest)
+    if(symbol.place.type == "g") then
+        return string.format("mov %s, %s", reg, self.global_addr + symbol.place.value)
+    elseif(symbol.place.type == "p") then
+        return string.format("mov %s, %s\nadd %s, %s", reg, self.current_method.local_size + 2, reg, "base_pointer")
+    elseif(symbol.place.type == "l") then
+        return string.format("mov %s, %s\nadd %s, %s", reg, symbol.place.value + 1, reg, "base_pointer")
+    end
+end
+
 CodeGen.emission_map = {
     ["call"]=function(c) return string.format("%s %s", c.type, c.target) end,
     ["st"]=function(c) return string.format("%s %s, %s", c.type, CodeGen.as_reg(c.source), CodeGen:as_memory(c.dest)) end,
-    ["ld"]=function(c) return string.format("%s %s, %s", c.type, CodeGen.as_reg(c.dest), CodeGen:as_memory(c.source)) end,
+    ["ld"]=function(c) return string.format("%s %s, %s", c.type, CodeGen.as_reg(c.dest), c.source.type=="t" and CodeGen.as_reg(c.source) or CodeGen:as_memory(c.source)) end,
     ["push"]=function(c) return string.format("%s %s", c.type, CodeGen.as_reg(c.target)) end,
     ["pop"]=function(c) return string.format("%s %s", c.type, CodeGen.as_reg(c.target)) end,
     ["ret"]=function(c) return c.type end,
     ["label"]=function(c) return c.value..":" end,
     ["jmp"]=function(c) return string.format("%s %s", c.type, c.target) end,
-    ["call"]=function(c) return string.format("%s %s", c.type, c.target) end
+    ["call"]=function(c) return string.format("%s %s", c.type, c.target) end,
+    ["!get_address"]=function(c) return CodeGen:emit_get_address(c.target, c.dest) end
 }
 
 

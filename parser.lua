@@ -7,6 +7,10 @@ function Parser.parse(toks)
     local TOKEN_TYPES = Token.TOKEN_TYPES
     local INVERTED_TOKENS = Token.INVERTED_TOKENS
     local NODE_TYPES = Node.NODE_TYPES
+
+    function new(type)
+        return Node:new(NODE_TYPES[type])
+    end
     --local symbol_table = {}
     local ast = {}
     
@@ -23,10 +27,25 @@ function Parser.parse(toks)
 
     function expect(type)
         local t = next_token()
-        if t.type ~= type then
-            error("Expected '" .. INVERTED_TOKENS[type] .. "', Received '" .. t.value .. "'")
+        if not t or t.type ~= type then
+            error("Expected '" .. INVERTED_TOKENS[type] .. "', Received '" .. (t and t.value or "EOF") .. "'")
         end
     end
+
+    function accept(type)
+        local t = peek_token()
+        if t and t.type == type then
+            next_token()
+            return true
+        else
+            return false
+        end
+    end
+
+    function check(type)
+        local t = peek_token()
+        return t and t.type == type
+    end            
 
     function parse_program()
         local program_node = Node:new(NODE_TYPES["Program"])
@@ -95,9 +114,7 @@ function Parser.parse(toks)
         if next_token().type == TOKEN_TYPES["{"] then
             while peek_token().type ~= TOKEN_TYPES["}"] do
                 table.insert(block_node, parse_statement())
-                if next_token().type ~= TOKEN_TYPES[";"] then
-                    error("Expected ';' after statement, Received " .. INVERTED_TOKENS[toks[i-1].type])
-                end
+                expect(TOKEN_TYPES[";"])
             end
             next_token()
         else
@@ -113,8 +130,8 @@ function Parser.parse(toks)
         -- Declaration
         if token.type == TOKEN_TYPES["TYPE_SPECIFIER"] then
             statement_node.child = parse_local_declaration()
-        elseif token.type == TOKEN_TYPES["ID"] then
-            if(toks[i+2].type == TOKEN_TYPES["("]) then
+        elseif check(TOKEN_TYPES["ID"]) or check(TOKEN_TYPES["*"]) then
+            if(toks[i+2] and (toks[i+2].type == TOKEN_TYPES["("])) then
                 statement_node.child = parse_function_call()
             else
                 statement_node.child = parse_assignment()
@@ -136,6 +153,13 @@ function Parser.parse(toks)
 
     function parse_assignment()
         local assignment_node = Node:new(NODE_TYPES["Assignment"])
+        if check(TOKEN_TYPES["*"]) then
+            assignment_node.indirection_level = 0
+            while accept(TOKEN_TYPES["*"]) do
+                assignment_node.indirection_level = assignment_node.indirection_level + 1
+            end
+        end
+
         assignment_node.id = parse_identifier()
 
         if next_token().type == TOKEN_TYPES["="] then
@@ -176,10 +200,16 @@ function Parser.parse(toks)
 
         local token = next_token()
 
-        if token.value == "int" or token.value == "float" or token.value == "char" or token.value == "double" or token.value == "void" or token.value == "bool" then
+        if token.value == "int" or token.value == "char" or token.value == "void" then
             type_specifier_node.value = token.value
         else
             error("Unexpected type specifier: " .. token.value)
+        end
+
+        type_specifier_node.indirection_level = 0;
+
+        while accept(TOKEN_TYPES["*"]) do
+            type_specifier_node.indirection_level = type_specifier_node.indirection_level + 1
         end
 
         return type_specifier_node
@@ -233,7 +263,7 @@ function Parser.parse(toks)
     end
 
     function parse_factor()
-        local factor_node = Node:new(NODE_TYPES["Factor"])
+        local factor_node = new("FACTOR")
 
         local token = peek_token()
         if token.type == TOKEN_TYPES["INT"] then
@@ -256,15 +286,46 @@ function Parser.parse(toks)
             next_token()
             factor_node.value = parse_expression()
 
-            if next_token().type ~= TOKEN_TYPES[")"] then
-                error("Expected ')' after expression")
-            end
+            expect(TOKEN_TYPES[")"])
+        elseif check(TOKEN_TYPES["&"]) then
+            factor_node.value = parse_address_of()
+        elseif check(TOKEN_TYPES["*"]) then
+            factor_node.value = parse_dereference()
         else
             error("Unexpected token: " .. token.value)
         end
 
         return factor_node
     end
+
+    function parse_dereference()
+        local dereference_node = new("DEREFERENCE")
+        expect(TOKEN_TYPES["*"])
+        if check(TOKEN_TYPES["ID"]) then
+ 
+            dereference_node.id = next_token().value
+        else
+            error("Can only dereference a variable")
+        end
+
+        return dereference_node
+    end
+
+    function parse_address_of()
+        local address_of_node = new("ADDRESS_OF")
+        expect(TOKEN_TYPES["&"])
+        
+        if check(TOKEN_TYPES["ID"]) then
+            address_of_node.id = next_token().value
+        else
+            error("Can only perform an address of operation on a variable")
+        end
+
+        return address_of_node
+    end
+
+
+
 
     function parse_function_call()
         local function_call_node = Node:new(NODE_TYPES["FUNCTION_CALL"])

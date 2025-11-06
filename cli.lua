@@ -14,11 +14,8 @@ local c = codegen:generate(irv:generate_ir_code(parser.parse(lexer.lex([[
     int x = 8;
 
     int main() {
-        fib(0, 1);
-    }
-    int fib(int a, int b) {
-        print_num(a);
-        fib(b, a + b);
+        int y = &x;
+        print_num(*y);
     }
 ]]))))
 
