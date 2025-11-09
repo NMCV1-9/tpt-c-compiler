@@ -1,7 +1,6 @@
 local Node = require('node')
 local Token = require('token')
 local Operand = require('operand')
-local util = require('util')
 
 -- Intermediate representation code generation
 
@@ -154,8 +153,8 @@ function IRVisitor:generate_ir_code(ast)
         end
         if(n.indirection_level) then
             local temp = operand.t()
-            table.insert(tac[method.id], {type="ld", source=symbol_table[n.id.id].place, dest=temp})
-            table.insert(tac[method.id], {type="st", source=n.value.place, dest=temp})
+            table.insert(tac[method.id], {type="ld", source=symbol_table[n.id.id].place, dest=temp.place})
+            table.insert(tac[method.id], {type="st", source=n.value.place, dest=temp.place})
         else
             table.insert(tac[method.id], {type="st", source=n.value.place, dest=symbol_table[n.id.id].place})
         end
@@ -257,10 +256,7 @@ function IRVisitor:generate_ir_code(ast)
             n.place = operand.t()
             table.insert(tac[method.id], {type="ld", source=symbol_table[n.value.id].place, dest=n.place})
             table.insert(tac[method.id], {type="ld", source=n.place, dest=n.place})
-        elseif(n.value.type == NODE_TYPES["STRING_LITERAL"]) then
-            n.place = operand.g(#n.value.value * self:sizeof("char"), init_data=util.strToArray(n.value.value))
-            -- statically construct the string literal in memory
-
+        else
             -- expression
             emit_expression(n.value)
 

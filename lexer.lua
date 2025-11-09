@@ -23,10 +23,10 @@ function Lexer.lex(s)
     local reserved = (lpeg.C(lpeg.P("if") + "else" + "for" + "while" + "return") * -loc.alnum) / function(r) return Token:new(TOKEN_TYPES[string.upper(r)], r) end
 
     -- Type specifiers
-    local type_specifier = (lpeg.C(lpeg.P("int") + "char" + "void") * (S * "*")^-1 * -loc.alnum) / function(ts) return Token:new(TOKEN_TYPES["TYPE_SPECIFIER"], ts) end
+    local type_specifier = (lpeg.C(lpeg.P("int") + "char" + "void") * -loc.alnum) / function(ts) return Token:new(TOKEN_TYPES["TYPE_SPECIFIER"], ts) end
     
     -- Punctuation
-    local punctuation = lpeg.C(lpeg.S("(){};,")) / function(p) return Token:new(TOKEN_TYPES[p], p) end
+    local punctuation = lpeg.C(lpeg.S("(){};,[]")) / function(p) return Token:new(TOKEN_TYPES[p], p) end
 
 
     -- Operators
@@ -39,8 +39,11 @@ function Lexer.lex(s)
 
     local id = lpeg.C(-(reserved + type_specifier) * (loc.alpha + "_") * (loc.alnum + "_")^0) / function(i) return Token:new(TOKEN_TYPES["ID"], i) end
 
-    -- LPEG is possessive so floats must be checked before integers else, integers will match the integer part of the float
-    local token = S * ((reserved + type_specifier + id + floats + integers + punctuation + op) * S)^0
+    -- String Literals
+    local string_lit = lpeg.C(lpeg.P("\"") * (lpeg.P(1) - "\"")^0 * "\"") / function(s) return Token:new(TOKEN_TYPES["STRING_LITERAL"], s) end
+
+    -- LPEG is greedy so floats must be checked before integers else, integers will match the integer part of the float
+    local token = S * ((reserved + type_specifier + id + string_lit + floats + integers + punctuation + op) * S)^0
     
     tokens = {token:match(s)}
     setmetatable(tokens, {__tostring = function(s) return util.array_to_string(s, " ") end })

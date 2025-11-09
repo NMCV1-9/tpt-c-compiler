@@ -57,9 +57,13 @@ main:
 	mov base_pointer, stack_pointer
 	mov r6, 2047
 	st r6, base_pointer, 1
-	ld r7, base_pointer, 1
-	ld r7, r7
-	mov r1, r7
+	mov r7, 5
+	ld r8, base_pointer, 1
+	ld r8, r8
+	add r7, r8
+	ld r9, base_pointer, 1
+	st r7, r9
+	ld r1, 2047
 	call print_num
 .exit_main:
 	pop base_pointer

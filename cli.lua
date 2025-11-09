@@ -7,15 +7,18 @@ local irv = require("ir")
 local codegen = require("codegen")
 
 
-
+print(serpent.block(lexer.lex([[
+    int str = "wow";
+]])))
 
 local c = codegen:generate(irv:generate_ir_code(parser.parse(lexer.lex([[
     
     int x = 8;
 
     int main() {
-        int y = &x;
-        print_num(*y);
+        int *y = &x;
+        *y = 5 + *y;
+        print_num(x);
     }
 ]]))))
 

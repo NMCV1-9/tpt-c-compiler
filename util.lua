@@ -16,6 +16,15 @@ function Utils.invert_table(table)
     return inverted_table
 end
 
+function Utils.string_to_array(str)
+    local result = {}
+    for i = 1, #str do
+        table.insert(result, string.sub(str, i, i))
+    end
+
+    return result
+end
+
 function Utils.array_to_string(table, delimiter)
     delimiter = delimiter or " "
     local string = ""

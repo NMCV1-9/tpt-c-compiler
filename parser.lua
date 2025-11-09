@@ -74,6 +74,17 @@ function Parser.parse(toks)
             expect(TOKEN_TYPES[")"])
 
             declaration_node.block = parse_block()
+        elseif token.type == TOKEN_TYPES["["] then
+            if check(TOKEN_TYPES["INT"]) then
+                declaration_node.length = next_token().value
+            else
+                error("Array size must be an integer constant")
+            end
+            expect(TOKEN_TYPES["]"])
+            if check(TOKEN_TYPES["="]) then
+                declaration_node.value = parse_initializer_list()
+            end
+            expect(TOKEN_TYPES[";"])
         elseif token.type == TOKEN_TYPES["="] then
             declaration_node.value = parse_expression()
             declaration_node.id.is_function = false;
@@ -84,6 +95,24 @@ function Parser.parse(toks)
 
         return declaration_node
     end
+
+    function parse_initializer_list()
+        local initializer_list_node = new("INITIALIZER_LIST")
+        expect(TOKEN_TYPES["{"])
+        if check(TOKEN_TYPES["}"]) then
+            return
+        end
+
+        table.insert(initializer_list_node, parse_expression())
+
+        while accept(TOKEN_TYPES[","]) do
+            table.insert(initializer_list_node, parse_expression())
+        end
+        expect(TOKEN_TYPES["}"])
+        
+        return initializer_list_node
+    end
+
 
     function parse_parameter_list()
         local parameter_list_node = Node:new(NODE_TYPES["Parameter_List"])
@@ -160,13 +189,11 @@ function Parser.parse(toks)
             end
         end
 
+
         assignment_node.id = parse_identifier()
 
-        if next_token().type == TOKEN_TYPES["="] then
-            assignment_node.value = parse_expression()
-        else
-            error("Unexpected token " .. INVERTED_TOKENS[peek_token().type])
-        end
+        expect(TOKEN_TYPES["="])
+        assignment_node.value = parse_expression()
 
 
         return assignment_node;
@@ -205,7 +232,6 @@ function Parser.parse(toks)
         else
             error("Unexpected type specifier: " .. token.value)
         end
-
         type_specifier_node.indirection_level = 0;
 
         while accept(TOKEN_TYPES["*"]) do
@@ -291,6 +317,10 @@ function Parser.parse(toks)
             factor_node.value = parse_address_of()
         elseif check(TOKEN_TYPES["*"]) then
             factor_node.value = parse_dereference()
+        elseif check(TOKEN_TYPES["STRING_LITERAL"]) then
+            local string_literal_node = new("STRING_LITERAL")
+            string_literal_node.value = string.sub(next_token().value, 2, -2)
+            factor_node.value = string_literal_node
         else
             error("Unexpected token: " .. token.value)
         end

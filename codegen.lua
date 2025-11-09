@@ -16,6 +16,8 @@ function CodeGen:as_memory(operand)
         return self:as_stack(operand)
     elseif(operand.type == "p") then
         return self:as_parameter(operand)
+    elseif(operand.type == "t" or operand.type == "r") then
+        return self.as_reg(operand)
     end
 end
 
@@ -53,7 +55,7 @@ end
 CodeGen.emission_map = {
     ["call"]=function(c) return string.format("%s %s", c.type, c.target) end,
     ["st"]=function(c) return string.format("%s %s, %s", c.type, CodeGen.as_reg(c.source), CodeGen:as_memory(c.dest)) end,
-    ["ld"]=function(c) return string.format("%s %s, %s", c.type, CodeGen.as_reg(c.dest), c.source.type=="t" and CodeGen.as_reg(c.source) or CodeGen:as_memory(c.source)) end,
+    ["ld"]=function(c) return string.format("%s %s, %s", c.type, CodeGen.as_reg(c.dest), CodeGen:as_memory(c.source)) end,
     ["push"]=function(c) return string.format("%s %s", c.type, CodeGen.as_reg(c.target)) end,
     ["pop"]=function(c) return string.format("%s %s", c.type, CodeGen.as_reg(c.target)) end,
     ["ret"]=function(c) return c.type end,
