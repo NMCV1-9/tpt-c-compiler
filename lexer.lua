@@ -21,10 +21,10 @@ function Lexer.lex(s)
     local floats = lpeg.C(loc.digit^1 * "." * loc.digit^1) / function(f) return Token:new(TOKEN_TYPES["FLOAT"], tonumber(f)) end
 
     -- Reserved words
-    local reserved = (lpeg.C(lpeg.P("if") + "else" + "for" + "while" + "return") * -loc.alnum) / function(r) return Token:new(TOKEN_TYPES[string.upper(r)], r) end
+    local reserved = (lpeg.C(lpeg.P("if") + "else" + "for" + "while" + "return" + "break" + "continue") * -loc.alnum) / function(r) return Token:new(TOKEN_TYPES[string.upper(r)], r) end
 
     -- Type specifiers
-    local type_specifier = (lpeg.C(lpeg.P("int") + "char" + "void" + "struct" + "union") * -loc.alnum) / function(ts) return Token:new(TOKEN_TYPES["TYPE_SPECIFIER"], ts) end
+    local type_specifier = (lpeg.C(lpeg.P("int") + "char" + "void" + "unsigned" + "signed"+ "struct" + "union") * -loc.alnum) / function(ts) return Token:new(TOKEN_TYPES["TYPE_SPECIFIER"], ts) end
 
     local storage_class = (lpeg.C(lpeg.P("auto") + "register" + "static") * -loc.alnum) / function(sc) return Token:new(TOKEN_TYPES["STORAGE_CLASS"], sc) end
     -- Punctuation
@@ -32,11 +32,11 @@ function Lexer.lex(s)
 
 
     -- Operators
-    local non_bool_ops = lpeg.C(lpeg.P("++") + lpeg.P("--") + lpeg.S("+-*/%!<=>&?:")) / function(o) return Token:new(TOKEN_TYPES[o], o) end
+    local non_bool_ops = lpeg.C(lpeg.P("++") + lpeg.P("--") + lpeg.P("->") + lpeg.P("...") + lpeg.P("<<") + lpeg.P(">>") + lpeg.S("+-*/%!<=>&?:.^")) / function(o) return Token:new(TOKEN_TYPES[o], o) end
 
     local bool_ops = lpeg.C(lpeg.P("&&") + "||" + "==" + "!=" + "<=" + ">=") / function(o) return Token:new(TOKEN_TYPES[o], o) end
 
-    local op = non_bool_ops + bool_ops
+    local op = bool_ops + non_bool_ops
     -- Identifiers
 
     local id = lpeg.C(-(reserved + type_specifier) * (loc.alpha + "_") * (loc.alnum + "_")^0) / function(i) return Token:new(TOKEN_TYPES["ID"], i) end
@@ -47,7 +47,7 @@ function Lexer.lex(s)
     local character = lpeg.C(lpeg.P("'") * (lpeg.P(1) - "'") * "'") / function(s) return Token:new(TOKEN_TYPES["CHARACTER"], s) end
 
     -- LPEG is greedy so floats must be checked before integers else, integers will match the integer part of the float
-    local token = S * ((reserved + type_specifier + id + string_lit + character + floats + integers + punctuation + op) * S)^0
+    local token = S * ((reserved + storage_class +type_specifier + id + string_lit + character + floats + integers + punctuation + op) * S)^0
     
     tokens = {token:match(s)}
     setmetatable(tokens, {__tostring = function(s) return util.array_to_string(s, " ") end })

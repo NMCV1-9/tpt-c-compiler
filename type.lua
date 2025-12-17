@@ -42,9 +42,21 @@ function Type.same_type_chain(type1, type2, allow_length_mismatch)
     return type1 == type2 -- both are nil
 end
 
-
     function Type.base(kind)
-        return Type:new({kind = Type.KINDS[string.upper(kind)]})
+        if(type(kind) == "table") then
+            if(#kind == 1) then
+                return Type:new({kind = Type.KINDS[string.upper(kind[1])], signed = true})
+            elseif(#kind == 2) then
+                local first_kind = string.upper(kind[1])
+                local second_kind = string.upper(kind[2])
+                assert((first_kind == "SIGNED" or first_kind == "UNSIGNED") and second_kind == "INT", "Invalid type specifier")
+                return Type:new({kind = Type.KINDS[second_kind], signed = first_kind == "SIGNED"})
+            else
+                error()
+            end
+        else
+            return Type:new({kind = Type.KINDS[string.upper(kind)], signed = true})
+        end
     end
 
     function Type.pointer(target_type)
@@ -57,6 +69,14 @@ end
 
     function Type.func(return_type, parameter_types)
         return Type:new({kind = Type.KINDS["FUNCTION"], return_type = return_type, parameter_types = parameter_types})
+    end
+
+    function Type.struct(id, members)
+        return Type:new({kind = Type.KINDS["STRUCT"], id = id, members = members or {}})
+    end
+
+    function Type.union(id, members)
+        return Type:new({kind = Type.KINDS["UNION"], id = id, members = members or {}})
     end
 
     function Type.is_base_type(type)
@@ -112,7 +132,6 @@ end
                 end
                 result = result .. ") -> " .. Type.to_string_pretty(type.return_type) .. ")"
             else
-                print(type.kind)
                 result = result .. Type.INVERTED_KINDS[type.kind]
             end
 

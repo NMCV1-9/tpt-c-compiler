@@ -6,28 +6,38 @@ local parser = require("parser")
 local irv = require("ir")
 local codegen = require("codegen")
 local type_checker = require("type_checker")
+local symbol_table = require("symbol_table")
 
-
-local c = codegen:generate(irv:generate_ir_code(type_checker:type_check(parser.parse(lexer.lex([[
-    int x(){
-        int a = 5;
-        print_num(a + 5);
+local type_checked_ast = type_checker:type_check(parser.parse(lexer.lex([[
+/*void fancy_print(char * str, ...) {
+    char c;
+    int arg_index = 0;
+    while(c = *str) {
+        if(c == '%'){
+            c = *(++str);
+            if(c == 'd') {
+                __print_signed_int(va_args[arg_index++]);
+            }else if(c == 's') {
+                printf(va_args[arg_index++]);
+            }
+        } else if(c =='\'){
+            c = *(++str);
+            if(c == 'n') {
+                putchar((char)1);
+            }
+        }else{
+            putchar(c);
+        }
+        str++;
     }
 
-    int (*y)() = x;
-    int z = y();
+}*/
+int main() {
+    register int i = 101;
+}
+    ]])), symbol_table)
 
-]])))))
--- local c = codegen:generate(irv:generate_ir_code(type_checker:type_check(parser.parse(lexer.lex([[
---     char *a[][] = {{"ab", "ef"}, {"cd"}};
--- ]])))))
-
--- local c = codegen:generate(irv:generate_ir_code(parser.parse(lexer.lex([[
---     int a[3] = {1, 99, 3};
---     int main() {
---         print_num(*(&a+1));
---     }
--- ]]))))
+local c = codegen:generate(irv:generate_ir_code(type_checked_ast, symbol_table), symbol_table)
 
 local file = io.open("main.asm", "w")
 file:write(c)

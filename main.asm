@@ -34,7 +34,7 @@
 
 jmp init
 global_data_section:
-    dw 0, 0
+    
 init:
     mov term_reg, 0x9F80
                               
@@ -52,69 +52,78 @@ init:
 
 start:
     mov stack_pointer,2047
-	mov r8, x
-	st r8, 1
-	ld r9, 1
-	call r9
-	add stack_pointer, 0
-	mov r10, return_reg
-	st r10, 2
-	hlt
-x:
+	jmp main
+main:
 	sub stack_pointer, 1
 	push base_pointer
 	mov base_pointer, stack_pointer
-	mov r5, 5
-	st r5, base_pointer, 1
-	ld r6, base_pointer, 1
-	add r6, 5
-	mov r1, r6
-	call print_num
-	mov r7, return_reg
-.exit_x:
+	mov r1, 101
+	st r1, base_pointer, 1
+.exit_main:
 	pop base_pointer
 	add stack_pointer, 1
-	ret
-print_num:
-	test r1, r1
-	jnz .not_zero
-	mov r1, '0'
-	st r1, term_reg, 0x25
-	jmp .exit
-.not_zero:
-	mov r2, 4		; p = 4
-.fixed_point:
-	mulh r3, r1, 52429	; q = (n * 52429) >> 16
-	shr r3, 3		; q >>= 3
-	mul r4, r3, 10		; d*q
-	sub r1, r4		; remainder = n - d*q
-	st r1, r2, .buf		
-	sub r2, 1		; p--;
-	movf r1, r3		; n = q
-	jnz .fixed_point
+	hlt
+__print_unsigned_int:
+	test r23, r23
+	jnz .__print_unsigned_int_not_zero
+	mov r23, '0'
+	st r23, term_reg, 0x25
+	jmp .__print_unsigned_int_exit
+.__print_unsigned_int_not_zero:
+	mov r24, 4		; p = 4
+.__print_unsigned_int_fixed_point:
+	mulh r25, r23, 52429	; q = (n * 52429) >> 16
+	shr r25, 3		; q >>= 3
+	mul r26, r25, 10		; d*q
+	sub r23, r26		; remainder = n - d*q
+	st r23, r24, .__print_unsigned_int_buf		
+	sub r24, 1		; p--;
+	movf r23, r25		; n = q
+	jnz .__print_unsigned_int_fixed_point
 
-	add r2, 1
-.print_int:
-	ld r1, r2, .buf
-	add r1, '0'
-	st r1, term_reg, 0x25
-	add r2, 1
-	cmp r2, 5
-	jne .print_int
+	add r24, 1
+.__print_unsigned_int_print_int:
+	ld r23, r24, .__print_unsigned_int_buf
+	add r23, '0'
+	st r23, term_reg, 0x25
+	add r24, 1
+	cmp r24, 5
+	jne .__print_unsigned_int_print_int
 	
-.exit:
+.__print_unsigned_int_exit:
 	ret
-.buf:
+.__print_unsigned_int_buf:
 	dw 0, 0, 0, 0, 0
+
+__print_signed_int:
+    cmp r23, 0
+    jge .__print_signed_int_not_negative
+    mov r24, '-'
+    st r24, term_reg, 0x25
+	xor r23, 65535
+    add r23, 1
+.__print_signed_int_not_negative:
+    call __print_unsigned_int
+    ret
     
 printf:
 .printf_loop:
-    ld r2, r1
-    test r2, r2
+    ld r24, r23
+    test r24, r24
     jz .printf_exit
-    st r2, term_reg, 0x25
-    add r1, 1
+    st r24, term_reg, 0x25
+    add r23, 1
     jmp .printf_loop
 .printf_exit:
     ret
-    
+
+putchar:
+    st r23, term_reg, 0x25
+    ret
+
+getchar:
+    ld return_reg, term_reg
+    test return_reg, return_reg
+    jz getchar
+    ret
+
