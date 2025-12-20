@@ -1,5 +1,9 @@
-char data_string[] = "aaronaboutaboveabuseacidsacresactoracuteadamsaddedadminadmitadobeadoptadultafteragainagentagingagreeaheadaimedalarmalbumalertaliasalicealienalignalikealiveallahallanallenallowalloyalonealongalphaalteramberamendaminoamongangelangerangleangryanimeannexannieapartapnicappleapplyaprilarborareasarenaarguearisearmedarmorarrayarrowarubaasciiasianasideaskedassetatlasaudioauditautosavoidawardawareawfulbabesbaconbadgebadlybakerballsbandsbanksbarrybasedbasesbasicbasinbasisbatchbathsbeachbeadsbeansbearsbeastbeatsbeganbeginbegunbeingbellebellybelowbeltsbenchberrybettybiblebikesbillsbillybingobirdsbirthbitchblackbladeblairblakeblameblankblastblendblessblindblinkblockblogsblondbloodbloombluesboardboatsbobbybondsbonesbonusboobsbooksboostboothbootsbootyboredboundboxedboxesbrainbrakebrandbrassbravebreadbreakbreedbrianbrickbridebriefbringbroadbrokebrookbrownbrucebrushbryanbucksbuddybuildbuiltbunchbunnyburkeburnsburstbusesbustybuttsbuyerbytescabincablecachecakescallscamelcampscanalcandycanoncardscareycargocarlocarolcarrycasescaseycasiocatchcausecedarcellscentschainchairchaoscharmchartchasecheapcheatcheckchesschestchevychickchiefchildchilechinachipschoirchosechrischuckcindyciscocitedciviccivilclaimclaraclarkclasscleanclearclerkclickcliffclimbclipsclockclonecloseclothcloudclubscoachcoastcockscodescohencoinscolincoloncolorcombocomescomiccondocongoconstcoralcorpscostacostscouldcountcourtcovercrackcraftcraigcrapscrashcrazycreamcreekcrestcrimecropscrosscrowdcrowncrudecubiccurvecybercycleczechdaddydailydairydaisydancedannydateddatesdaviddavisdealsdealtdeathdebugdebutdecordelaydelhideltadensedepotdepthderbyderekdeveldevildevondianadianediarydickedicksdiegodiffsdigitdildodirtydiscodiscsdisksdodgedoingdollsdonnadonordoorsdoubtdoverdozendraftdraindramadrawndrawsdreamdressdrieddrilldrinkdrivedropsdrovedrugsdrumsdrunkdryerdubaidutchdyingdylaneagleearlyearthebonyebookeddieedgaredgesegypteightelderelecteliteellenelliselvisemacsemailemilyemptyendedendifenemyenjoyenterentryepsonequalerroressayessexeurosevanseventeveryexactexamsexcelexistextrafacedfacesfactsfailsfairyfaithfallsfalsefancyfaresfarmsfatalfattyfaultfavorfearsfeedsfeelsfenceferryfeverfewerfiberfibrefieldfifthfiftyfightfiledfilesfilmefilmsfinalfindsfiredfiresfirmsfirstfixedfixesflagsflameflashfleetfleshfloatfloodfloorflourflowsfloydfluidflushflyerfocalfocusfolksfontsfoodsforceforgeformsforthfortyforumfotosfoundframefrankfraudfreshfrontfrostfruitfullyfundsfunkyfunnyfuzzygainsgamesgammagatesgaugegenesgenreghanaghostgiantgiftsgirlsgivengivesglassglennglobeglorygnomegoalsgoinggonnagoodsgottagracegradegraingramsgrandgrantgraphgrassgravegreatgreekgreengrillgrossgroupgrovegrowngrowsguardguessguestguideguildhairyhaitihandshandyhappyharryhavenhayesheadsheardheartheathheavyhelenhellohelpshencehenryherbshighshillshinduhintshiredhobbyholdsholeshollyhomeshondahoneyhonorhopedhopeshornyhorsehostshotelhourshousehowtohumanhumoriconsidahoidealideasimageinboxindexindiaindieinnerinputintelinterintroiraqiirishisaacislamissueitalyitemsivoryjacobjamesjamiejanetjapanjasonjeansjennyjerryjessejesusjeweljimmyjohnsjoinsjointjokesjonesjoycejudgejuicejuliajuliekarenkarmakathykatiekeepskeithkellykennykenyakerrykevinkillskindakindskingskittykleinknifeknockknownknowskodakkorealabellaborladenlakeslampslancelandslaneslankalargelarrylaserlaterlatexlatinlaughlauralayerleadslearnleaseleastleaveleedslegallemonleonelevellewislexuslightlikedlikeslimitlindalinedlineslinkslinuxlionslistslivedliverliveslloydloadsloanslobbylocallockslodgeloganlogicloginlogoslooksloopslooselopezlotuslouislovedloverloveslowerlucaslucialuckylunchlycoslyinglyricmacromagicmailsmainemajormakermakesmalesmaltamambomangamanormaplemarchmarcomardimariamariemariomarksmarshmasonmatchmaybemayormazdamealsmeansmeantmedalmediameetsmenusmercymergemeritmerrymetalmetermetromeyermiamimicromightmilanmilesmilfsmillsmindsminesminorminusmixedmixermodelmodemmodesmoneymontemonthmooremoralmosesmotelmotormountmousemouthmovedmovesmoviempegsmsgidmultimusicmyersmysqlnailsnakednamednamesnancynastynavalneedsnepalnervenevernewernewlynigernightnikonnoblenodesnoisenokianorthnotednotesnotrenovelnursenylonoasisoccuroceanofferoftenolderoliveomahaomegaonionopensoperaorbitorderorganoscarotheroughtouterownedowneroxideozonepackspagespaintpairspanelpanicpantspaperpapuaparisparkspartspartypastapastepatchpathspatiopaxilpeacepearlpeerspenispennyperryperthpeterphasephonephotophpbbpianopickspiecepillspilotpipespitchpixelpizzaplaceplainplaneplansplantplateplaysplazaplotspoemspointpokerpolarpollspoolspornoportspostspoundpowerpresspriceprideprimeprintpriorprizeprobepromoproofproudproveproxypulsepumpspunchpuppypursepussyqatarqueenqueryquestqueuequickquietquiltquitequoteracesracksradarradioraiserallyralphranchrandyrangeranksrapidratedratesratioreachreadsreadyrealmrebelreferrehabrelaxrelayremixrenewreplyresetretrorhoderickyriderridesridgerightringsrisksriverroadsrobinrobotrocksrockyrogerrolesrollsromanroomsrootsrosesrougeroughroundrouteroverroyalrugbyruledrulesruralsafersagemsaintsaladsalemsalessallysalonsambasamoasandysantasanyosarahsatinsaucesaudisavedsaversavessbjctscalescaryscenescoopscopescorescottscoutscrewscubaseatsseedsseeksseemssellssendssenseserumservesetupsevenshadeshaftshakeshallshameshapesharesharksharpsheepsheersheetshelfshellshiftshineshipsshirtshockshoesshootshopsshoreshortshotsshownshowssidessightsigmasignssillysimonsincesinghsitessixthsizedsizesskillskinsskirtskypeslavesleepslideslopeslotsslutssmallsmartsmellsmilesmithsmokesnakesockssolarsolidsolvesongssonicsorrysortssoulssoundsouthspacespainspanksparcsparespeakspecsspeedspellspendspentspermspicespiesspinesplitspokesportspotsspraysquadstackstaffstagestakestampstandstarsstartstatestatsstaysstealsteamsteelstepsstevestickstillstockstonestoodstopsstorestormstorystrapstripstuckstudystuffstylesuckssudansugarsuitesuitssunnysupersurgesusansweetswiftswingswissswordsyriatabletahoetakentakestalestalkstamiltampatankstapestaskstastetaxesteachteamstearsteddyteensteethtellstermsterryteststexastextsthankthatsthefttheirthemetherethesethetathickthingthinkthirdthongthosethreethrowthumbtigertighttilestimertimestionstiredtirestitletodaytokentokyotommytonertonestoolstoothtopictotaltouchtoughtourstowertownstoxictracetracktracttracytradetrailtraintranstrashtreattreestrendtrialtribetricktriedtriestripstrouttrucktrulytrunktrusttruthtubestulsatumortunertunesturboturnstwicetwikitwinstwisttylertypesultrauncleunderunionunitsunityuntilupperupseturbanusageusersusingusualutilsvalidvaluevalvevaultvegasvenueverdeversevideoviewsvillavinylviralvirusvisitvistavitalvocalvoicevolvovotedvotesvsnetwageswagonwaleswalkswallswannawantswastewatchwaterwattswaveswayneweeksweirdwellswelshwendywhalewhatswheatwheelwherewhichwhilewhitewholewhorewhosewiderwidthwileywindswineswingswiredwireswitchwiveswomanwomenwoodswordsworksworldworryworseworstworthwouldwoundwristwritewrongwrotexanaxxeroxxhtmlyachtyahooyardsyearsyeastyemenyieldyoungyoursyouthyukonzdnetzones";
+char data_string[] = "aaronaboutaboveabuseacidsacresactoracuteadamsaddedadminadmitadobeadoptadultafteragainagentagingagreeaheadaimedalarmalbumalertaliasalicealienalignalikealiveallahallanallenallowalloyalonealongalphaalteramberamendaminoamongangelangerangleangryanimeannexannieapartapnicappleapplyaprilarborareasarenaarguearisearmedarmorarrayarrowarubaasciiasianasideaskedassetatlasaudioauditautosavoidawardawareawfulbabesbaconbadgebadlybakerballsbandsbanksbarrybasedbasesbasicbasinbasisbatchbathsbeachbeadsbeansbearsbeastbeatsbeganbeginbegunbeingbellebellybelowbeltsbenchberrybettybiblebikesbillsbillybingobirdsbirthbisonblackbladeblairblakeblameblankblastblendblessblindblinkblockblogsblondbloodbloombluesboardboatsbobbybondsbonesbonusboobsbooksboostboothbootsbootyboredboundboxedboxesbrainbrakebrandbrassbravebreadbreakbreedbrianbrickbridebriefbringbroadbrokebrookbrownbrucebrushbryanbucksbuddybuildbuiltbunchbunnyburkeburnsburstbusesbustybuttsbuyerbytescabincablecachecakescallscamelcampscanalcandycanoncardscareycargocarlocarolcarrycasescaseycasiocatchcausecedarcellscentschainchairchaoscharmchartchasecheapcheatcheckchesschestchevychickchiefchildchilechinachipschoirchosechrischuckcindyciscocitedciviccivilclaimclaraclarkclasscleanclearclerkclickcliffclimbclipsclockclonecloseclothcloudclubscoachcoastcockscodescohencoinscolincoloncolorcombocomescomiccondocongoconstcoralcorpscostacostscouldcountcourtcovercrackcraftcraigcrapscrashcrazycreamcreekcrestcrimecropscrosscrowdcrowncrudecubiccurvecybercycleczechdaddydailydairydaisydancedannydateddatesdaviddavisdealsdealtdeathdebugdebutdecordelaydelhideltadensedepotdepthderbyderekdeveldevildevondianadianediarydickedicksdiegodiffsdigitdildodirtydiscodiscsdisksdodgedoingdollsdonnadonordoorsdoubtdoverdozendraftdraindramadrawndrawsdreamdressdrieddrilldrinkdrivedropsdrovedrugsdrumsdrunkdryerdubaidutchdyingdylaneagleearlyearthebonyebookeddieedgaredgesegypteightelderelecteliteellenelliselvisemacsemailemilyemptyendedendifenemyenjoyenterentryepsonequalerroressayessexeurosevanseventeveryexactexamsexcelexistextrafacedfacesfactsfailsfairyfaithfallsfalsefancyfaresfarmsfatalfattyfaultfavorfearsfeedsfeelsfenceferryfeverfewerfiberfibrefieldfifthfiftyfightfiledfilesfilmefilmsfinalfindsfiredfiresfirmsfirstfixedfixesflagsflameflashfleetfleshfloatfloodfloorflourflowsfloydfluidflushflyerfocalfocusfolksfontsfoodsforceforgeformsforthfortyforumfotosfoundframefrankfraudfreshfrontfrostfruitfullyfundsfunkyfunnyfuzzygainsgamesgammagatesgaugegenesgenreghanaghostgiantgiftsgirlsgivengivesglassglennglobeglorygnomegoalsgoinggonnagoodsgottagracegradegraingramsgrandgrantgraphgrassgravegreatgreekgreengrillgrossgroupgrovegrowngrowsguardguessguestguideguildhairyhaitihandshandyhappyharryhavenhayesheadsheardheartheathheavyhelenhellohelpshencehenryherbshighshillshinduhintshiredhobbyholdsholeshollyhomeshondahoneyhonorhopedhopeshornyhorsehostshotelhourshousehowtohumanhumoriconsidahoidealideasimageinboxindexindiaindieinnerinputintelinterintroiraqiirishisaacislamissueitalyitemsivoryjacobjamesjamiejanetjapanjasonjeansjennyjerryjessejesusjeweljimmyjohnsjoinsjointjokesjonesjoycejudgejuicejuliajuliekarenkarmakathykatiekeepskeithkellykennykenyakerrykevinkillskindakindskingskittykleinknifeknockknownknowskodakkorealabellaborladenlakeslampslancelandslaneslankalargelarrylaserlaterlatexlatinlaughlauralayerleadslearnleaseleastleaveleedslegallemonleonelevellewislexuslightlikedlikeslimitlindalinedlineslinkslinuxlionslistslivedliverliveslloydloadsloanslobbylocallockslodgeloganlogicloginlogoslooksloopslooselopezlotuslouislovedloverloveslowerlucaslucialuckylunchlycoslyinglyricmacromagicmailsmainemajormakermakesmalesmaltamambomangamanormaplemarchmarcomardimariamariemariomarksmarshmasonmatchmaybemayormazdamealsmeansmeantmedalmediameetsmenusmercymergemeritmerrymetalmetermetromeyermiamimicromightmilanmilesmilfsmillsmindsminesminorminusmixedmixermodelmodemmodesmoneymontemonthmooremoralmosesmotelmotormountmousemouthmovedmovesmoviempegsmsgidmultimusicmyersmysqlnailsnakednamednamesnancynastynavalneedsnepalnervenevernewernewlynigernightnikonnoblenodesnoisenokianorthnotednotesnotrenovelnursenylonoasisoccuroceanofferoftenolderoliveomahaomegaonionopensoperaorbitorderorganoscarotheroughtouterownedowneroxideozonepackspagespaintpairspanelpanicpantspaperpapuaparisparkspartspartypastapastepatchpathspatiopaxilpeacepearlpeerspenalpennyperryperthpeterphasephonephotophpbbpianopickspiecepillspilotpipespitchpixelpizzaplaceplainplaneplansplantplateplaysplazaplotspoemspointpokerpolarpollspoolspornoportspostspoundpowerpresspriceprideprimeprintpriorprizeprobepromoproofproudproveproxypulsepumpspunchpuppypursepussyqatarqueenqueryquestqueuequickquietquiltquitequoteracesracksradarradioraiserallyralphranchrandyrangeranksrapidratedratesratioreachreadsreadyrealmrebelreferrehabrelaxrelayremixrenewreplyresetretrorhoderickyriderridesridgerightringsrisksriverroadsrobinrobotrocksrockyrogerrolesrollsromanroomsrootsrosesrougeroughroundrouteroverroyalrugbyruledrulesruralsafersagemsaintsaladsalemsalessallysalonsambasamoasandysantasanyosarahsatinsaucesaudisavedsaversavessbjctscalescaryscenescoopscopescorescottscoutscrewscubaseatsseedsseeksseemssellssendssenseserumservesetupsevenshadeshaftshakeshallshameshapesharesharksharpsheepsheersheetshelfshellshiftshineshipsshirtshockshoesshootshopsshoreshortshotsshownshowssidessightsigmasignssillysimonsincesinghsitessixthsizedsizesskillskinsskirtskypeslavesleepslideslopeslotsslutssmallsmartsmellsmilesmithsmokesnakesockssolarsolidsolvesongssonicsorrysortssoulssoundsouthspacespainspanksparcsparespeakspecsspeedspellspendspentspermspicespiesspinesplitspokesportspotsspraysquadstackstaffstagestakestampstandstarsstartstatestatsstaysstealsteamsteelstepsstevestickstillstockstonestoodstopsstorestormstorystrapstripstuckstudystuffstylesuckssudansugarsuitesuitssunnysupersurgesusansweetswiftswingswissswordsyriatabletahoetakentakestalestalkstamiltampatankstapestaskstastetaxesteachteamstearsteddyteensteethtellstermsterryteststexastextsthankthatsthefttheirthemetherethesethetathickthingthinkthirdthongthosethreethrowthumbtigertighttilestimertimestionstiredtirestitletodaytokentokyotommytonertonestoolstoothtopictotaltouchtoughtourstowertownstoxictracetracktracttracytradetrailtraintranstrashtreattreestrendtrialtribetricktriedtriestripstrouttrucktrulytrunktrusttruthtubestulsatumortunertunesturboturnstwicetwikitwinstwisttylertypesultrauncleunderunionunitsunityuntilupperupseturbanusageusersusingusualutilsvalidvaluevalvevaultvegasvenueverdeversevideoviewsvillavinylviralvirusvisitvistavitalvocalvoicevolvovotedvotesvsnetwageswagonwaleswalkswallswannawantswastewatchwaterwattswaveswayneweeksweirdwellswelshwendywhalewhatswheatwheelwherewhichwhilewhitewholewhorewhosewiderwidthwileywindswineswingswiredwireswitchwiveswomanwomenwoodswordsworksworldworryworseworstworthwouldwoundwristwritewrongwrotexanaxxeroxxhtmlyachtyahooyardsyearsyeastyemenyieldyoungyoursyouthyukonzebrazones";
+int letter_boundaries[] = {0, 79, 187, 298, 368, 408, 487, 534, 577, 599, 622, 645, 717, 794, 821, 844, 923, 933, 993, 1169, 1273, 1288, 1311, 1366, 1369, 1380, 1382}
 
+char __scan_signed_int(int *num);
+int __scan_char_array(char *str);
+/*
 void fancy_print(char * string, ...) {
     register char c;
     register int arg_index = 0;
@@ -30,8 +34,7 @@ void fancy_print(char * string, ...) {
     }
 }
 
-char __scan_signed_int(int *num);
-int __scan_char_array(char *str);
+
 
 int fscanf(char *format, ...) {
     register char c;
@@ -63,7 +66,7 @@ int fscanf(char *format, ...) {
         ++ptr;
     }
     return (int)(ptr - format);
-}
+}*/
 
 char __scan_signed_int(int *num) {
     register char c;
@@ -101,11 +104,11 @@ int __scan_char_array(char *str) {
 
     return (int)(ptr - str);
 }
-
+/*
 int strcmp(char *str1, char *str2) {
     register char *str1_ptr = str1;
     register char *str2_ptr = str2;
-    for(register int i = 0; i < 5; ++i) {
+    for(register int i = 0; i < 4; ++i) {
         if(str1_ptr[i] == str2_ptr[i]) {
             continue;
         }else if(str1_ptr[i] < str2_ptr[i]){
@@ -116,7 +119,7 @@ int strcmp(char *str1, char *str2) {
     }
 
     return 0;
-}
+}*/
 
 int is_letter_in_word(char letter, char *word) {
     register char *ptr = word;
@@ -138,23 +141,73 @@ void move_cursor(int x, int y) {
     }
 }
 
+void clear_screen() {
+    set_cursor(0);
+    __print_char_array("                                                                                                ");
+}
+
 int main() {
+    __print_char_array("Enter a\nnumber to\nhelp\nrandomize:\n(1-100): ");
+    int mnum;
+    __scan_signed_int(&mnum);
+    register int num = mnum;
+    num = ((num ^ (num << 5)) * 313);
+    num = (num ^ (num >> 3)) & 1023;
+    clear_screen();
+    register char *word = data_string + num * 5;
     __print_char_array("Enter a word\n");
-    char word[6] = "money";
+    
     /* Yellow == 06, Grey == 08, Green == 02 
     fancy_print("%00X%00X%00X%00X%00X%0?");*/
     char query[6];
     register int word_found = 0;
     for(register int i = 1;i < 6; ++i) {
     putchar(' ');
-    __scan_char_array(query);
-    register int l = 0;
-    register int h = 1381;
+    putchar(' ');
+    putchar(' ');
+    query[0] = getchar();
+    register int diff = *query - 'a';
+    putchar(*query);
+    register int l = letter_boundaries[diff];
+    register int h = letter_boundaries[diff + 1] - 1;
+
+
+    
+    query[1] = getchar();
+    putchar(query[1]);
+    register int mid = (l + h) >> 1;
+    register char mid_char = data_string[mid * 5 + 1];
+    if(query[1] > mid_char) {
+        l = mid + 1;
+    } else if(query[1] < mid_char) {
+        h = mid - 1;
+    }
+    
+
+
+
+
+
+
+    __scan_char_array(query + 2);
     while(l <= h) {
-        register int mid = (l + h) >> 1;
-        register int result = strcmp(query, (char*)data_string + mid * 5);
+        mid = (l + h) >> 1;
+        register int result = 0;
+        if(query[1] != data_string[mid * 5 + 1]) {
+            result = query[1] - data_string[mid * 5 + 1];
+        }else
+        if(query[2] != data_string[mid * 5 + 2]) {
+            result = query[2] - data_string[mid * 5 + 2];
+        }else
+        if(query[3] != data_string[mid * 5 + 3]) {
+            result = query[3] - data_string[mid * 5 + 3];
+        }else
+        if(query[4] != data_string[mid * 5 + 4]) {
+            result = query[4] - data_string[mid * 5 + 4];
+        }
+
         if(result == 0) {
-            move_cursor(1, i);
+            move_cursor(3, i);
             register int cnt = 0;
             for(register int j = 0; j < 5; ++j) {
                 if(word[j] == query[j]) {
@@ -184,14 +237,15 @@ int main() {
     }
 
     if(l > h) {
-        move_cursor(1, i);
-        fancy_print("?????");
+        move_cursor(3, i);
+        __print_char_array("?????");
         move_cursor(0, i + 1);
     }
 }
 
     if(!word_found) {
-        __print_char_array("\nThe word was\n");
+        __print_char_array("The word was\n");
+        word[5] = 0;
         __print_char_array(word);
     }
     

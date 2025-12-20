@@ -822,10 +822,11 @@ function Type_Checker:type_check(ast, symbol_table)
             if(n.handle == nil) then
                 error("Symbol '" .. n.value .. "' used before definition")
             end
-            -- if(n.handle.type.kind == Type.KINDS["ARRAY"]) then
-            --     n.handle.type = pointer(n.handle.type.points_to)
-            -- end
-            n.value_type = n.handle.type
+            if(n.handle.type.kind == Type.KINDS["ARRAY"]) then
+                n.value_type = pointer(n.handle.type.points_to)
+            else
+                n.value_type = n.handle.type
+            end
             if(n.value_type.kind == Type.KINDS["FUNCTION"]) then
                 n.value_type = pointer(n.value_type)
             end

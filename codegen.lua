@@ -208,7 +208,8 @@ start:
         gen = gen .. "\thlt\n"
     end
     -- handle method code
-    for method_id, c in pairs(code.tac) do
+    for _, method_id in ipairs(code.tac) do
+        c = code.tac[method_id]
         self.current_method = self.symbol_table.get_symbol(method_id, symbol_table.ordinary)
         -- emit prologue
         method = self.symbol_table.get_symbol(method_id, symbol_table.ordinary)
@@ -273,7 +274,10 @@ CodeGen.use_def_map = {
     ["sub"]=function(c) return {c.source, c.dest}, {c.dest} end,
     ["mull"]=function(c) return {c.source, c.dest}, {c.dest} end,
     ["shl"]=function(c) return {c.source, c.dest}, {c.dest} end,
-    ["shr"]=function(c) return {c.source, c.dest}, {c.dest} end
+    ["shr"]=function(c) return {c.source, c.dest}, {c.dest} end,
+    ["xor"]=function(c) return {c.source, c.dest}, {c.dest} end,
+    ["and"]=function(c) return {c.source, c.dest}, {c.dest} end,
+    ["or"]=function(c) return {c.source, c.dest}, {c.dest} end
 }
 setmetatable(CodeGen.use_def_map, {
     __index=function(t, x)
@@ -615,17 +619,30 @@ function CodeGen:peephole(tac)
     local removals = 0
     for i = #tac - 1, 1, -1 do
         local c = tac[i]
+        local nc = tac[i + 1]
         if(c.type == "mov" and c.source == c.dest) then
             table.remove(tac, i)
             removals = removals + 1
-        end
-        -- if(c.type == "addoffset" and tac[i + 1].type == "ld" and c.dest == tac[i + 1].source) then
-        --     tac[i] = {type="ldoffset", source=c.source, dest=tac[i + 1].dest, offset=c.offset}
-        --     table.remove(tac, i + 1)
+        elseif(c.type == "addoffset" and tac[i + 1].type == "ld" and c.dest == tac[i + 1].source and tac[i + 1].dest == tac[i + 1].source) then
+            tac[i] = {type="ldoffset", source=c.source, dest=tac[i + 1].dest, offset=c.offset}
+            table.remove(tac, i + 1)
+            removals = removals + 1
+        elseif(c.type == "mov" and nc.type == "ld" and c.dest == nc.source and nc.dest == nc.source) then
+            tac[i]={type="ld", source=c.source, dest=nc.dest}
+            table.remove(tac, i + 1)
+            removals = removals + 1
+        elseif(c.type == "add" and nc.type == "ld" and c.dest == nc.source and nc.dest == nc.source) then
+            tac[i]={type="ldoffset", source=nc.source, dest=nc.dest, offset=c.source}
+            table.remove(tac, i + 1)
+            removals = removals + 1
+        elseif(c.type == "mov" and nc.type == "add" and c.dest == nc.dest) then
+            tac[i] = {type="addoffset", source = c.source, dest = nc.dest, offset = nc.source}
+            table.remove(tac, i + 1)
+            removals = removals + 1
         -- elseif(c.type == "mov" and tac[i + 1].type == "add" or tac[i + 1].type == "sub" and c.dest == tac[i + 1].dest) then
         --     --tac[i + 1].source = Operand:new("pr", c.source.value, tac[i + 1].source)
         --     --table.remove(tac, i)
-        -- end
+        end
     end
     print("Removed", removals, "instructions")
 end
