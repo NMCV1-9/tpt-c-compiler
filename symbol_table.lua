@@ -8,11 +8,7 @@ local symbol_table = {level=0, tag_symbols={}, ordinary_symbols={["NULL"]={type=
 ["__print_signed_int"]={type=Type.func(Type.base("VOID"), {Type.base("INT")}), place={is_standard_function=true, type="i",value="__print_signed_int"}},
 ["putchar"]={type=Type.func(Type.base("VOID"), {Type.base("CHAR")}), place={is_standard_function=true, type="i",value="putchar"}},
 ["getchar"]={type=Type.func(Type.base("CHAR"), {}), place={is_standard_function=true, type="i",value="getchar"}},
-["printf"]={type=Type.func(Type.base("INT"), {Type.pointer(Type.base("CHAR"))}), place={is_standard_function=false, is_variadic=true,type="i",value="printf"}},
-["scanf"]={type=Type.func(Type.base("INT"), {Type.pointer(Type.base("CHAR"))}), place={is_standard_function=false, is_variadic=true,type="i",value="scanf"}},
-["__scanf_signed_int"]={type=Type.func(Type.base("INT"), {Type.pointer(Type.base("INT"))}), place={is_standard_function=true, type="i",value="__scanf_signed_int"}},
-["__scanf_unsigned_int"]={type=Type.func(Type.base("INT"), {Type.pointer(Type.base("INT"))}), place={is_standard_function=true, type="i",value="__scanf_unsigned_int"}},
-["__scanf_char_array"]={type=Type.func(Type.pointer(Type.base("CHAR")), {Type.pointer(Type.base("CHAR"))}), place={is_standard_function=true, type="i",value="__scanf_char_array"}},
+["__scan_unsigned_int"]={type=Type.func(Type.base("VOID"), {Type.base("INT")}), place={is_standard_function=true, type="i",value="__scan_unsigned_int"}},
 ["set_colour"]={type=Type.func(Type.base("VOID"), {Type.base("INT")}), place={is_standard_function=true, type="i",value="set_colour"}},
 ["set_cursor"]={type=Type.func(Type.base("VOID"), {Type.base("INT")}), place={is_standard_function=true, type="i",value="set_cursor"}},
 ["__print_char_array"]={type=Type.func(Type.base("VOID"), {Type.pointer(Type.base("CHAR"))}), place={is_standard_function=true, is_variadic=false, type="i",value="__print_char_array"}}}}

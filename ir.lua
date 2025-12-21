@@ -13,7 +13,7 @@ local IRVisitor = { tac = {["!global"]={}},
                     global = 0,
                     label = 0,
                     global_data = {},
-                    types = {["INT"]=1, ["CHAR"]=1, ["VOID"]=1, ["POINTER"]=1},
+                    types = {["INT"]=1, ["CHAR"]=1, ["VOID"]=1, ["POINTER"]=1}, -- size of the types
                     global_method = {id = "!global"},
                     loop_labels = {},
                     case_labels = {}
@@ -324,8 +324,6 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
         ["+="] = "add",
         ["-="] = "sub",
         ["*="] = "mull",
-        ["/="] = "div",
-        ["%="] = "mod",
         ["&="] = "and",
         ["|="] = "or",
         ["^="] = "xor",
@@ -345,6 +343,10 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
             emit_assignment_expression(n.rhs)
             if(n.op == "=") then
                 n.place = emit_move(n.rhs.place, n.lhs.place) -- emit_move will return the source for optimization reasons
+            elseif(n.op == "/=") then
+                error()
+            elseif(n.op == "%=") then
+                error()
             else
                 d_assert(symbol_to_operation_type[n.op], Message.internal_error("Unsupported assignment operator: " .. n.op, n.pos))
                 local lhs_place = n.lhs.place

@@ -72,17 +72,17 @@ set_cursor:
     st %1, term_cursor
     ret
 
-__scanf_unsigned_int:
+__scan_unsigned_int:
     mov %2, 0
-__scanf_unsigned_int_loop:
+__scan_unsigned_int_loop:
     call getchar
     sub return_reg, '0'
     cmp return_reg, 9
-    jg __scanf_unsigned_int_not_digit 
+    jg __scan_unsigned_int_not_digit 
     mull %2, 10
     add %2, return_reg
-    jmp __scanf_unsigned_int_loop
-__scanf_unsigned_int_not_digit:
+    jmp __scan_unsigned_int_loop
+__scan_unsigned_int_not_digit:
     st %2, %1
     ret
 

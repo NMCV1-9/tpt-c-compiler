@@ -33,10 +33,7 @@ function Parser.parse(toks)
     function expect(type)
         local t = next_token()
         if not t or t.type ~= TOKEN_TYPES[type] then
-            if(t.pos) then
-                print("at row " .. t.pos.row .. ", column " .. t.pos.col)
-            end
-            error("Expected '" .. type .. "', Received '" .. (t and t.value or "EOF") .. "'")
+            Diagnostics.submit(Message.error(string.format("Expected '%s', Received '%s'", type, peek_token().value), peek_token().pos))
         end
     end
 
@@ -575,6 +572,8 @@ function Parser.parse(toks)
             direct_declarator_node.declarator = parse_declarator()
             direct_declarator_node.id = direct_declarator_node.declarator.direct_declarator.id
             expect(")")
+        elseif(multi_check({",", ")"})) then
+            error("Abstract function prototypes are not supported yet")
         else
             error(string.format("Unexpected token: '%s'", peek_token()))
         end
@@ -840,6 +839,9 @@ function Parser.parse(toks)
             node = parse_expression()
             expect(")")
         else
+            
+            local serpent = require("serpent")
+            print(serpent.block(peek_token()))
             Diagnostics.submit(Message.error("Unexpected token: " .. peek_token().value, peek_token().pos))
         end
 

@@ -193,8 +193,8 @@ start:
     mov stack_pointer,]] .. self.size .. "\n" -- the stack decrements before storing a value, so the stack will initially overlap with the global storage
 
     -- handle global code
-    --self:peephole(code.tac["!global"])
-    --self:allocate_registers(code.tac["!global"])
+    self:peephole(code.tac["!global"])
+    self:allocate_registers(code.tac["!global"])
     for i, c in ipairs(code.tac["!global"]) do
         gen = gen .. "\t" .. self.emission_map[c.type](c) .. "\n"
         

@@ -641,17 +641,17 @@ set_cursor:
     st r22, term_cursor
     ret
 
-__scanf_unsigned_int:
+__scan_unsigned_int:
     mov r23, 0
-__scanf_unsigned_int_loop:
+__scan_unsigned_int_loop:
     call getchar
     sub return_reg, '0'
     cmp return_reg, 9
-    jg __scanf_unsigned_int_not_digit 
+    jg __scan_unsigned_int_not_digit 
     mull r23, 10
     add r23, return_reg
-    jmp __scanf_unsigned_int_loop
-__scanf_unsigned_int_not_digit:
+    jmp __scan_unsigned_int_loop
+__scan_unsigned_int_not_digit:
     st r23, r22
     ret
 
