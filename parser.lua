@@ -456,6 +456,9 @@ function Parser.parse(toks)
             non_if_statement_node = parse_case()
         elseif(check("DEFAULT")) then
             non_if_statement_node = parse_default()
+        elseif(check(";")) then
+            non_if_statement_node = new("EMPTY_STATEMENT")
+            next_token()
         else
             non_if_statement_node = parse_expression()
             expect(";")
@@ -530,6 +533,7 @@ function Parser.parse(toks)
         if(check("ID")) then
             struct_or_union_specifier_node.id = parse_identifier()
         end
+        
         -- Currently, only isolated struct declaration is supported
         if(accept("{")) then
             struct_or_union_specifier_node.declaration = {}

@@ -205,6 +205,9 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
         local offset = 0
         for i, member in ipairs(type.members) do
             member.offset = offset
+            if(member.type.kind == Type.KINDS["STRUCT"] or member.type.kind == Type.KINDS["UNION"]) then
+                compute_struct_layout(member.type)
+            end
             offset = offset + self:sizeof(member.type)
         end
         type.size = offset
@@ -218,6 +221,7 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
             size = math.max(size, self:sizeof(member.type))
         end
         type.size = size
+        
         return type
     end
 
@@ -706,6 +710,8 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
             emit_case(n.child)
         elseif(node_check(n.child, "DEFAULT")) then
             emit_default(n.child)
+        elseif(node_check(n.child, "EMPTY_STATEMENT")) then
+            --nothing
         else
             emit_expression(n.child)
         end
@@ -1088,7 +1094,7 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
             if(indexer.type == "i") then
                 indexer = operand.i(indexer.value * size)
             end
-            table.insert(tac[self.method.id], {type="addoffset", source=pointer, dest=pr, offset = indexer})
+            table.insert(tac[self.method.id], {type="add3", source=pointer, dest=pr, offset = indexer})
             return pr
         else
             local t = emit_dereference(pointer)

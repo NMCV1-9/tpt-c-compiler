@@ -49,16 +49,25 @@ function Type_Checker:type_check(ast, symbol_table)
         if(n.declaration) then
             local type = nil
             if(n.is_struct) then
-                type = struct(n.id.id)
+                type = struct(n.id and n.id.id or "anon_struct")
             else
-                type = union(n.id.id)
+                type = union(n.id and n.id.id or "anon_union")
             end
             n.value_type = type
-            add_symbol(n.id.id, {type = type}, symbol_table.tag)
+            if(n.id) then
+                add_symbol(n.id.id, {type = type}, symbol_table.tag)
+            end
             for _, child in ipairs(n.declaration) do
                 local base_type = nil
                     if(node_check(child.type_specifier.kind, "STRUCT_OR_UNION_SPECIFIER")) then
-                        base_type = get_symbol(child.type_specifier.kind.id.id, symbol_table.tag).type
+                        if(child.type_specifier.kind.id) then
+                            base_type = get_symbol(child.type_specifier.kind.id.id, symbol_table.tag).type
+                        else
+                            print(Node.INVERTED_NODE_TYPES[child.type_specifier.kind.type])
+                            check_struct_or_union_type(child.type_specifier.kind)
+                            base_type = child.type_specifier.kind.value_type
+                            print(to_string_pretty(base_type))
+                        end
                     else
                         base_type = base(child.type_specifier.kind)
                     end
@@ -74,7 +83,7 @@ function Type_Checker:type_check(ast, symbol_table)
             n.value_type = get_symbol(n.id.id, symbol_table.tag).type
         end
 
-        n.handle = get_symbol(n.id.id, symbol_table.tag)
+        --n.handle = get_symbol(n.id.id, symbol_table.tag)
     end
 
     function check_enum_type(n)
@@ -237,6 +246,8 @@ function Type_Checker:type_check(ast, symbol_table)
             check_case(n.child)
         elseif(node_check(n.child, "DEFAULT")) then
             check_default(n.child)
+        elseif(node_check(n.child, "EMPTY_STATEMENT")) then
+            -- nothing
         elseif(node_check(n.child, "EXPRESSION")) then
             check_expression(n.child)
         end
@@ -261,6 +272,7 @@ function Type_Checker:type_check(ast, symbol_table)
     end
 
     function check_for(n)
+        new_scope("for_loop_" .. next_block_id())
         if(node_check(n.initialization, "DECLARATION")) then
             build_type(n.initialization)
         else
@@ -271,6 +283,7 @@ function Type_Checker:type_check(ast, symbol_table)
         end
         check_statement(n.statement)
         check_expression(n.update)
+        exit_scope()
     end
 
     function check_while(n)

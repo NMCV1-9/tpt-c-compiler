@@ -33,6 +33,16 @@ function CodeGen:as_memory(operand)
     end
 end
 
+function CodeGen:get_offset_local_or_param(offset, local_size)
+    if(offset.type == "l") then
+        return operand.value + 1
+    elseif(offset.type == "p") then
+        return local_size + 2 + offset.value
+    else
+        error()
+    end
+end
+
 function CodeGen:as_parameter(operand)
     return "base_pointer, " .. (self.current_method.local_size + operand.value + 2) -- +2 for the return address and base pointer
 end
@@ -57,16 +67,17 @@ function CodeGen.as_reg(operand)
     end
 end
 
+
+
 function CodeGen:emit_get_address(symbol, dest)
-    reg = CodeGen.as_reg(dest)
     if(symbol.type == "g") then
-        return string.format("mov %s, %s", reg, self.global_addr + symbol.value)
+        return {type="mov", source=Operand:new("g", symbol.value), dest=dest}
     elseif(symbol.type == "p") then
-        return string.format("add %s, %s, %s", reg, "base_pointer", self.current_method.local_size + 2 + symbol.value)
+        return {type="add3", source=Operand:new("r", "base_pointer"), offset=Operand:new("i", self.current_method.local_size + 2 + symbol.value), dest=dest}
     elseif(symbol.type == "l") then
-        return string.format("add %s, %s, %s", reg, "base_pointer", symbol.value + 1)
+        return {type="add3", source=Operand:new("r", "base_pointer"), offset=Operand:new("i", symbol.value + 1), dest=dest}
     elseif(symbol.type == "pr") then
-        return string.format("mov %s, %s", reg, self.as_reg(symbol))
+        return {type="mov", source=symbol, dest=dest}
     else
         print(symbol.type)
         error("Invalid symbol type")
@@ -84,7 +95,7 @@ CodeGen.emission_map = {
     ["cmp"]=function(c) return string.format("%s %s, %s", c.type, CodeGen.as_reg(c.first), c.second.type == "i" and c.second.value or CodeGen.as_reg(c.second)) end,
     ["!get_address"]=function(c) return CodeGen:emit_get_address(c.target, c.dest) end,
     ["nop"]=function(c) return c.type end,
-    ["addoffset"]=function(c) return string.format("%s %s, %s, %s", "add", CodeGen.as_reg(c.dest), c.source.type == "i" and c.source.value or CodeGen.as_reg(c.source), c.offset.type == "i" and c.offset.value or CodeGen.as_reg(c.offset)) end,
+    ["add3"]=function(c) return string.format("%s %s, %s, %s", "add", CodeGen.as_reg(c.dest), c.source.type == "i" and c.source.value or CodeGen.as_reg(c.source), c.offset.type == "i" and c.offset.value or CodeGen.as_reg(c.offset)) end,
     ["ldoffset"]=function(c) return string.format("%s %s, %s, %s", "ld", CodeGen.as_reg(c.dest), CodeGen.as_reg(c.source), c.offset.type == "i" and c.offset.value or CodeGen.as_reg(c.offset)) end
 }
 
@@ -193,8 +204,11 @@ start:
     mov stack_pointer,]] .. self.size .. "\n" -- the stack decrements before storing a value, so the stack will initially overlap with the global storage
 
     -- handle global code
-    self:peephole(code.tac["!global"])
-    self:allocate_registers(code.tac["!global"])
+    self:lower_abstract_instructions(code.tac["!global"])
+    if(self.optimized) then
+        self:allocate_registers(code.tac["!global"])
+        self:peephole(code.tac["!global"])
+    end
     for i, c in ipairs(code.tac["!global"]) do
         gen = gen .. "\t" .. self.emission_map[c.type](c) .. "\n"
         
@@ -220,6 +234,7 @@ start:
         gen = gen .. "\tmov base_pointer, stack_pointer\n"
         -- emit body
         local used_registers = nil
+        self:lower_abstract_instructions(c)
         if(self.optimized) then
             used_registers =self:allocate_registers(c)
             
@@ -266,7 +281,7 @@ CodeGen.use_def_map = {
     ["push"]=function(c) return {c.target}, {} end,
     ["pop"]=function(c) return {}, {c.target} end,
     ["call"]=function(c) return {c.target}, {} end,
-    ["addoffset"]=function(c) return {c.source, c.offset}, {c.dest} end,
+    ["add3"]=function(c) return {c.source, c.offset}, {c.dest} end,
     ["ldoffset"]=function(c) return {c.source, c.offset}, {c.dest} end,
     ["cmp"]=function(c) return {c.first, c.second}, {} end,
     ["add"]=function(c) return {c.source, c.dest}, {c.dest} end,
@@ -340,42 +355,21 @@ end
 
 local reg_operands = {["t"]=1, ["vr"]=1, ["pr"]=1}
 
-
-function CodeGen.get_polished_use_def(use, def)
-    local polished_use = {}
-    for _, v in ipairs(use) do
-        if(reg_operands[v.type] and v.value ~= "return_reg") then
-            table.insert(polished_use, v.value)
-        end
-    end
-    local polished_def = {}
-    for _, v in ipairs(def) do
-        if(reg_operands[v.type] and v.value ~= "return_reg") then
-
-            table.insert(polished_def, v.value)
-        end
-    end
-    return polished_use, polished_def
-end
-
 function CodeGen:build_block_use_def(block)
     local def_seen = {}
     block.use = {}
     block.def = {}
     for i, c in ipairs(block.code) do
-        local use, def = self.get_polished_use_def(self.use_def_map[c.type](c))
-        if(#use > 0 and use[1] == nil or #def > 0 and def[1] == nil) then
-            error()
-        end
-        for _,v in ipairs(use) do
-            if(def_seen[v] == nil) then
-                block.use[v] = true
+        local use, def = self:get_instruction_use_def(c)
+        for k,v in pairs(use) do
+            if(def_seen[k] == nil) then
+                block.use[k] = v
             end
         end
-        for _,v in ipairs(def) do
-            if(def_seen[v] == nil) then
-                def_seen[v] = true
-                block.def[v] = true
+        for k,v in pairs(def) do
+            if(def_seen[k] == nil) then
+                def_seen[k] = v
+                block.def[k] = v
             end
         end
     end
@@ -455,28 +449,12 @@ function CodeGen:compute_per_instruction_liveness(block)
     local live = copy_set(block.live_out)
     for i = #block.code, 1, -1 do
         block.per_instruction_live_out[i] = copy_set(live)
-        local temp_use, temp_def = self.get_polished_use_def(self.use_def_map[block.code[i].type](block.code[i]))
-        local use = {}
-        local def = {}
-        for i, v in ipairs(temp_use) do
-            use[v] = true
-        end
-        for i, v in ipairs(temp_def) do
-            def[v] = true
-        end
+        local use, def = self:get_instruction_use_def(block.code[i])
         live = multi_union({use, difference(live, def)}) or {}
         
         block.per_instruction_live_in[i] = copy_set(live)
     end
     if(not equal(block.live_in, block.per_instruction_live_in[1])) then
-        print(block.id)
-        for k, v in pairs(block.per_instruction_live_in[1]) do
-            print("per instruction live in", k, v)
-        end
-        for k, v in pairs(block.live_in) do
-            print("live in", k, v)
-        end
-
         error("Live in and per instruction live in are not equal")
     end
     if(not equal(block.live_out, block.per_instruction_live_out[#block.code])) then
@@ -489,24 +467,36 @@ function CodeGen:build_interference_graph(blocks)
 
     for i, block in ipairs(blocks) do
         for j = 1, #block.code do
-            local use, def = self.get_polished_use_def(self.use_def_map[block.code[j].type](block.code[j]))
-            for _, v in ipairs(def) do
-                interference_graph[v] = interference_graph[v] or {}
-                for k, _ in pairs(block.per_instruction_live_out[j]) do
-                    assert(type(v) == "number" and type(k) == "number", "Invalid operands")
-                    interference_graph[k] = interference_graph[k] or {}
-                    if(v ~= k) then
-                        
-                        interference_graph[v][k] = true
-                        
-                        interference_graph[k][v] = true
-                    end
+            local use, def = self:get_instruction_use_def(block.code[j])
+            for k1, v1 in pairs(def) do
+                interference_graph[k1] = interference_graph[k1] or {}
+                for k2, v2 in pairs(block.per_instruction_live_out[j]) do
+                    assert(type(k1) == "number" and type(k2) == "number", "Invalid operands")
+                    interference_graph[k1][k2] = true
+                    interference_graph[k2][k1] = true
                 end
             end
         end
     end
 
     return interference_graph
+end
+
+function CodeGen:get_instruction_use_def(ins)
+    local use_list, def_list = self.use_def_map[ins.type](ins)
+    local use_set = {}
+    local def_set = {}
+    for _, v in ipairs(use_list) do
+        if(reg_operands[v.type]) then
+            use_set[v.value] = true
+        end
+    end
+    for _, v in ipairs(def_list) do
+        if(reg_operands[v.type]) then
+            def_set[v.value] = true
+        end
+    end
+    return use_set, def_set
 end
 
 function CodeGen:colour_graph(graph)
@@ -614,16 +604,29 @@ function CodeGen:allocate_registers(tac)
 
 end
 
+function CodeGen:lower_abstract_instructions(tac)
+    for i = #tac - 1, 1, -1 do
+        local c = tac[i]
+        if(c.type == "!get_address") then
+            tac[i] = self:emit_get_address(c.target, c.dest)
+        end
+    end
+end
+
+
 function CodeGen:peephole(tac)
     -- Peephole optimization
+    -- TODO: clean this up with some more general rules/algorithms
+
     local removals = 0
+    local base_pointer = Operand:new("r", "base_pointer")
     for i = #tac - 1, 1, -1 do
         local c = tac[i]
         local nc = tac[i + 1]
         if(c.type == "mov" and c.source == c.dest) then
             table.remove(tac, i)
             removals = removals + 1
-        elseif(c.type == "addoffset" and tac[i + 1].type == "ld" and c.dest == tac[i + 1].source and tac[i + 1].dest == tac[i + 1].source) then
+        elseif(c.type == "add3" and tac[i + 1].type == "ld" and c.dest == tac[i + 1].source and tac[i + 1].dest == tac[i + 1].source) then
             tac[i] = {type="ldoffset", source=c.source, dest=tac[i + 1].dest, offset=c.offset}
             table.remove(tac, i + 1)
             removals = removals + 1
@@ -636,15 +639,30 @@ function CodeGen:peephole(tac)
             table.remove(tac, i + 1)
             removals = removals + 1
         elseif(c.type == "mov" and nc.type == "add" and c.dest == nc.dest) then
-            tac[i] = {type="addoffset", source = c.source, dest = nc.dest, offset = nc.source}
+            if(reg_operands[c.source.type]) then
+                tac[i] = {type="add3", source = c.source, dest = nc.dest, offset = nc.source}
+                table.remove(tac, i + 1)
+                removals = removals + 1
+            elseif(c.source.type == "i" and type(c.source.value) == "number" and nc.source.type == "i" and type(nc.source.value) == "number") then
+                tac[i] = {type="mov", source = Operand:new("i", c.source.value + nc.source.value), dest = nc.dest}
+                table.remove(tac, i + 1)
+                removals = removals + 1
+            end
+        elseif(c.type == "add" and c.source.type == "i" and c.source.value == 0) then
+            table.remove(tac, i)
+            removals = removals + 1
+        elseif(c.type == "add" and nc.type == "add" and (c.source.type == "l" or c.source.type == "p") and nc.source.type == "i" and c.dest == nc.dest) then
+            tac[i] = {type="add3", source = base_pointer, dest = c.dest, offset = operand.i(get_offset_local_or_param(c.source.value, self.current_method.local_size) + nc.source.value)}
             table.remove(tac, i + 1)
             removals = removals + 1
-        -- elseif(c.type == "mov" and tac[i + 1].type == "add" or tac[i + 1].type == "sub" and c.dest == tac[i + 1].dest) then
-        --     --tac[i + 1].source = Operand:new("pr", c.source.value, tac[i + 1].source)
-        --     --table.remove(tac, i)
+        elseif(c.type == "add3" and nc.type == "add" and c.source.value == "base_pointer" and c.offset.type == "i" and nc.source.type == "i" and c.dest == nc.dest) then
+            tac[i] = {type="add3", source = base_pointer, dest=c.dest, offset = Operand:new("i", c.offset.value + nc.source.value)}
+            table.remove(tac, i + 1)
+            removals = removals + 1
         end
+        
     end
-    print("[OPTIMIZER] Removed", removals, "instructions")
+    --print("[OPTIMIZER] Removed", removals, "instructions")
 end
 
 

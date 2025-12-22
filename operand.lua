@@ -1,7 +1,7 @@
 -- operand.lua
 local util = require("util")
 
-local Operand = {__eq=function(a, b) return a.type == b.type and a.value == b.value end}
+local Operand = {__eq=function(a, b) return a.type == b.type and a.value == b.value and a.offset == b.offset end}
 Operand.__index = Operand
 
 Operand.INVERTED_PLACE_TYPES = {"IMMEDIATE", "TEMPORARY", "LVALUE"}

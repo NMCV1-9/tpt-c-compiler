@@ -239,7 +239,6 @@ main:
 	mov r2, 1023
 	and r1, r2
 	call clear_screen
-	add stack_pointer, 0
 	mov r2, 1
 	mull r1, 5
 	add r2, r1
@@ -300,12 +299,10 @@ main:
 	mov r22, ' '
 	call putchar
 	add r4, base_pointer, 2
-	add r4, 0
 	call getchar
 	mov r5, return_reg
 	st r5, r4
-	add r4, base_pointer, 2
-	ld r4, r4
+	ld r4, base_pointer, 2
 	sub r4, 'a'
 	add r5, base_pointer, 2
 	ld r22, r5
@@ -317,16 +314,15 @@ main:
 	add r6, r4
 	ld r4, r6
 	sub r4, 1
-	add r6, base_pointer, 2
-	add r6, 1
+	add r6, base_pointer, 3
 	call getchar
 	mov r7, return_reg
 	st r7, r6
-	add r6, base_pointer, 2
-	add r6, 1
+	add r6, base_pointer, 3
 	ld r22, r6
 	call putchar
-	add r6, r5, r4
+	mov r6, r5
+	add r6, r4
 	shr r6, 1
 	mov r7, 1
 	mov r8, r6
@@ -337,7 +333,8 @@ main:
 	ld r8, r8, 1
 	cmp r8, r7
 	jle .label_21
-	add r5, r6, 1
+	mov r5, r6
+	add r5, 1
 	jmp .label_22
 	.label_21:
 	add r8, base_pointer, 2
@@ -350,8 +347,7 @@ main:
 	.label_23:
 	.label_24:
 	.label_22:
-	add r6, base_pointer, 2
-	add r6, 2
+	add r6, base_pointer, 4
 	push r6
 	call __scan_char_array
 	add stack_pointer, 1
@@ -360,14 +356,16 @@ main:
 	cmp r5, r4
 	jg .label_26
 	mov r7, 0
-	add r6, r5, r4
+	mov r6, r5
+	add r6, r4
 	shr r6, 1
 	mov r8, r6
 	mull r8, 5
 	add r9, base_pointer, 2
 	ld r9, r9, 1
 	mov r10, 1
-	add r11, r8, 1
+	mov r11, r8
+	add r11, 1
 	ld r10, r10, r11
 	cmp r9, r10
 	je .label_27
@@ -383,7 +381,8 @@ main:
 	add r9, base_pointer, 2
 	ld r9, r9, 2
 	mov r10, 1
-	add r11, r8, 2
+	mov r11, r8
+	add r11, 2
 	ld r10, r10, r11
 	cmp r9, r10
 	je .label_29
@@ -399,7 +398,8 @@ main:
 	add r9, base_pointer, 2
 	ld r9, r9, 3
 	mov r10, 1
-	add r11, r8, 3
+	mov r11, r8
+	add r11, 3
 	ld r10, r10, r11
 	cmp r9, r10
 	je .label_31
@@ -415,7 +415,8 @@ main:
 	add r9, base_pointer, 2
 	ld r9, r9, 4
 	mov r10, 1
-	add r11, r8, 4
+	mov r11, r8
+	add r11, 4
 	ld r10, r10, r11
 	cmp r9, r10
 	je .label_33
@@ -443,7 +444,8 @@ main:
 	sub r4, 1
 	jmp .label_38
 	.label_37:
-	add r5, r6, 1
+	mov r5, r6
+	add r5, 1
 	.label_38:
 	.label_36:
 	jmp .label_25
@@ -465,7 +467,8 @@ main:
 	mov r4, 7119
 	mov r22, r4
 	call __print_char_array
-	add r4, r3, 1
+	mov r4, r3
+	add r4, 1
 	push r4
 	mov r4, 0
 	push r4
