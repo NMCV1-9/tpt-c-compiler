@@ -126,9 +126,11 @@ function Parser.parse(toks, symbol_table)
             table.insert(declaration_node.declarators, declarator)
         end
         declaration_node.declarator = declaration_node.declarators[1]
-        -- FIX THIS! Go through every declarator
+
         if(declaration_node.specifier.storage_class.kind == "typedef") then
-            symbol_table.add_symbol(declaration_node.declarator.id.id, {is_type_name = true}, symbol_table.ordinary)
+            for _, declarator in ipairs(declaration_node.declarators) do
+                symbol_table.add_symbol(declarator.id.id, {is_type_name = true}, symbol_table.ordinary)
+            end
         end
 
         return declaration_node
@@ -476,6 +478,9 @@ function Parser.parse(toks, symbol_table)
         elseif(check(";")) then
             non_if_statement_node = new("EMPTY_STATEMENT")
             next_token()
+        elseif(check("ASM")) then
+            non_if_statement_node = parse_asm()
+            expect(";")
         else
             non_if_statement_node = parse_expression()
             expect(";")
@@ -483,6 +488,88 @@ function Parser.parse(toks, symbol_table)
 
         return non_if_statement_node
     end
+
+    function parse_asm()
+        local asm_node = new("ASM")
+        expect("ASM")
+        expect("(")
+        asm_node.asm = {}
+        while(check("STRING_LITERAL")) do
+            table.insert(asm_node.asm, string.sub(next_token().value, 2, -2))
+        end
+
+        asm_node.asm = table.concat(asm_node.asm, "\n\t")
+
+        if(accept(":")) then
+            asm_node.inputs = parse_asm_argument_list()
+        end
+        if(accept(":")) then
+            asm_node.outputs = parse_asm_argument_list()
+        end
+        if(accept(":")) then
+            asm_node.clobbers = parse_register_identifier_list()
+        end
+
+        expect(")")
+        return asm_node
+    end
+
+    function parse_asm_argument_list()
+        local arguments_node = new("ASM_ARGUMENT_LIST")
+        arguments_node.arguments = {}
+        if(check(":") or check(")")) then
+            return arguments_node
+        end
+        table.insert(arguments_node.arguments, parse_asm_argument())
+        while(accept(",")) do
+            table.insert(arguments_node.arguments, parse_asm_argument())
+        end
+
+        return arguments_node
+    end
+
+    function parse_register_identifier_list()
+        local register_list_node = new("REGISTER_IDENTIFIER_LIST")
+        if(not check("ID")) then
+            return register_list_node
+        end
+        table.insert(register_list_node, parse_register_identifier())
+        while(accept(",")) do
+            table.insert(register_list_node, parse_register_identifier())
+        end
+        return register_list_node
+    end
+
+    function parse_asm_argument()
+        local argument_node = new("ASM_ARGUMENT")
+        if(check("ID")) then
+            argument_node.asm_symbol = parse_register_identifier()
+        else
+            Diagnostics.submit(Message.error("Missing register identifier in asm statement", peek_token().pos))
+        end
+        expect("=")
+        if(check("ID")) then
+            argument_node.c_symbol = parse_identifier()
+        else
+            Diagnostics.submit(Message.error("Missing C variable identifier in asm statement", peek_token().pos))
+        end
+        return argument_node
+
+    end
+
+    function parse_register_identifier()
+        local register_identifier_node = new("REGISTER_IDENTIFIER")
+        register_identifier_node.pos = peek_token().pos
+        local reg_str = next_token().value
+        if(string.find(reg_str, "^r%d+$")) then
+            register_identifier_node.id = reg_str
+        else
+            Diagnostics.submit(Message.error(string.format("Invalid register identifier in asm statement: '%s'", reg_str), register_identifier_node.pos))
+        end
+
+        return register_identifier_node
+    end
+
 
     function parse_switch()
         local switch_node = new("SWITCH")

@@ -6,7 +6,7 @@ local type_checker = require("type_checker")
 local symbol_table = require("symbol_table")
 local util = require("util")
 
-local usage = "Usage: lua cli.lua input.c [--output output.asm] [--size total-memory-size] [--offset offset]" 
+local usage = "Usage: lua cli.lua input.c [--output output.asm] [--size total-memory-size] [--term-width width] [--term-height height] [--offset offset]" 
 if(#arg < 1) then
     print(usage)
     os.exit(1)
@@ -30,6 +30,18 @@ for arg_idx = 2, #arg - 1, 2 do
         codegen.size = size - 1
     elseif arg[arg_idx] == "--output" then
         output_name = arg[arg_idx + 1]
+    elseif arg[arg_idx] == "--term-width" then
+        local width = tonumber(arg[arg_idx + 1])
+        if not width then
+            error("Invalid term-width argument: '"..arg[arg_idx + 1].."'")
+        end
+        codegen.term_width = width
+    elseif arg[arg_idx] == "--term-height" then
+        local height = tonumber(arg[arg_idx + 1])
+        if not height then
+            error("Invalid term-height argument: '"..arg[arg_idx + 1].."'")
+        end
+        codegen.term_height = height
     end
 end
 

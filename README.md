@@ -43,14 +43,17 @@ In a terminal, use cli.lua to compile your program like in the following snippet
 
 ```bash
 
-lua cli.lua input.c [--output output.asm] [--size total-memory-size]
+lua cli.lua input.c [--output output.asm] [--size total-memory-size] [--term-height terminal-rows] [--term-width terminal-cols] [--offset global-offset]
 
 ```
 |Optional Argument|Description|Default value|
 |-|:-:|:-:|
-|\-\-output|The name of the outputted .asm file|\<input-file-name\>.asm
+|\-\-output|The name of the outputted .asm file|\<input-file-name\>.asm|
 |\-\-size|The total memory size in words or memory_rows * 128|2048|
-|\-\-offset|The global offset of the program in memory|0
+|\-\-term-height|The number of character rows in the terminal|8
+|\-\-term-width|The number of character columns in the terminal|12|
+|\-\-offset|The global offset of the program in memory|0|
+
   
 
 This command should produce an assembly file. Keep track of the directory the file appears in and pass this directory to TPTASM using The Powder Toy's console (accessible via the keyboard shortcut "~" or the "C" icon in the GUI). Note that the R3 must be in the simulation area for the following command to work.
@@ -73,7 +76,7 @@ Your compiled program should now be stored in the R3's memory. By turning decora
 #### If you encounter any problems during the compilation process, make sure to reach out to me on [TPT's discord](https://powdertoy.co.uk/Discussions/Thread/View.html?Thread=25871) where I have the username lithium404.
 
 # Standard Library Documentation
-Many of the methods in this library have the prefix "`--`" which usually indicates that these methods are for the compiler's internal use. However, since a formal standard library is still being designed, these temporary methods can still be tremendously useful.
+Many of the methods in this library have the prefix "`__`" which usually indicates that these methods are for the compiler's internal use. However, since a formal standard library is still being designed, these temporary methods can still be tremendously useful.
 
 ## `void __print_unsigned_int(int i)`
 Displays an unsigned integer.

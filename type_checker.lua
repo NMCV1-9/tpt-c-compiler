@@ -267,12 +267,33 @@ function Type_Checker:type_check(ast, symbol_table)
             check_case(n.child)
         elseif(node_check(n.child, "DEFAULT")) then
             check_default(n.child)
+        elseif(node_check(n.child, "ASM")) then
+            check_asm(n.child)
         elseif(node_check(n.child, "EMPTY_STATEMENT")) then
             -- nothing
         elseif(node_check(n.child, "EXPRESSION")) then
             check_expression(n.child)
         end
     end
+
+    function check_asm(n)
+        if(n.inputs) then
+            check_asm_arguments(n.inputs)
+        end
+        if(n.outputs) then
+            check_asm_arguments(n.outputs)
+        end
+    end
+
+    function check_asm_arguments(n)
+        for _, argument in ipairs(n.arguments) do
+            argument.c_symbol.handle = symbol_table.get_symbol(argument.c_symbol.id, symbol_table.ordinary)
+            assert(argument.c_symbol.handle ~= nil, "C symbol not found")
+        end
+    end
+        
+
+
 
     function check_switch(n)
         if(not can_coerce(check_expression(n.condition), base("INT"))) then

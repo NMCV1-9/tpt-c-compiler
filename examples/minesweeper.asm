@@ -8,7 +8,9 @@
 
 ; Initialization and defining basic macros
 %define term_base 0x9F80
-
+%define term_height 8
+%define term_width 12
+ 
 %eval term_input  term_base 0x00 +
 %eval term_raw    term_base 0x04 +
 %eval term_single term_base 0x05 +
@@ -55,9 +57,9 @@ init:
     mov term_reg, 0x9F80
                               
     ld r0, term_reg                
-    mov r1, { 11 5 << }
+    mov r1, { term_width 1 - 5 << }
     st r1, term_hrange
-    mov r1, { 7 5 << }
+    mov r1, { term_height 1 - 5 << }
     st r1, term_vrange
     mov r1, 0x1000
     st r1, term_cursor

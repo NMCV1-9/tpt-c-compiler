@@ -765,12 +765,61 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
             emit_case(n.child)
         elseif(node_check(n.child, "DEFAULT")) then
             emit_default(n.child)
+        elseif(node_check(n.child, "ASM")) then
+            emit_asm(n.child)
         elseif(node_check(n.child, "EMPTY_STATEMENT")) then
             --nothing
         else
             emit_expression(n.child)
         end
     end
+
+    function emit_asm(n)
+        if(n.clobbers) then
+            emit_asm_clobbers_push(n.clobbers)
+        end
+        if(n.inputs) then
+            emit_asm_inputs(n.inputs)
+        end
+
+        table.insert(tac[self.method.id], {type="asm", asm=n.asm})
+        
+        if(n.outputs) then
+            emit_asm_outputs(n.outputs)
+        end
+        if(n.clobbers) then 
+            emit_asm_clobbers_pop(n.clobbers)
+        end
+    end
+
+    function emit_asm_clobbers_push(n)
+        for _, register in ipairs(n) do
+            table.insert(tac[self.method.id], {type="push", target=operand.r(register.id)})
+        end
+    end
+    function emit_asm_clobbers_pop(n)
+        for i = #n, 1, -1 do
+            local register = n[i]
+            table.insert(tac[self.method.id], {type="pop", target=operand.r(register.id)})
+        end
+    end
+
+    function emit_asm_inputs(n)
+        for _, input in ipairs(n.arguments) do
+            local reg_place = operand.r(input.asm_symbol.id)
+            local c_place = input.c_symbol.handle.place
+            emit_move(c_place, reg_place)
+        end
+    end
+
+    function emit_asm_outputs(n)
+        for _, output in ipairs(n.arguments) do
+            local reg_place = operand.r(output.asm_symbol.id)
+            local c_place = output.c_symbol.handle.place
+            emit_move(reg_place, c_place)
+        end
+    end
+
 
     function emit_case(n)
         emit_primary_expression(n.value)

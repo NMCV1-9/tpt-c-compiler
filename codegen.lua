@@ -3,6 +3,8 @@ local Standard_Library = require("standard_library")
 local Diagnostics = require("diagnostics")
 local CodeGen = {
     size=2047,
+    term_width=12,
+    term_height=8,
     global_addr=1,
     symbol_table={},
     available_registers={},
@@ -96,7 +98,8 @@ CodeGen.emission_map = {
     ["cmp"]=function(c) return string.format("%s %s, %s", c.type, CodeGen.as_reg(c.first), c.second.type == "i" and c.second.value or CodeGen.as_reg(c.second)) end,
     ["nop"]=function(c) return c.type end,
     ["add3"]=function(c) return string.format("%s %s, %s, %s", "add", CodeGen.as_reg(c.dest), c.source.type == "i" and c.source.value or CodeGen.as_reg(c.source), c.offset.type == "i" and c.offset.value or CodeGen.as_reg(c.offset)) end, -- might remove this later since the __index metamethod can handle 3 operand instructions
-    ["ldoffset"]=function(c) return string.format("%s %s, %s, %s", "ld", CodeGen.as_reg(c.dest), CodeGen.as_reg(c.source), c.offset.type == "i" and c.offset.value or CodeGen.as_reg(c.offset)) end
+    ["ldoffset"]=function(c) return string.format("%s %s, %s, %s", "ld", CodeGen.as_reg(c.dest), CodeGen.as_reg(c.source), c.offset.type == "i" and c.offset.value or CodeGen.as_reg(c.offset)) end,
+    ["asm"]=function(c) return c.asm end
 }
 
 
@@ -145,6 +148,11 @@ function CodeGen:generate(code, symbol_table)
 
 ; Initialization and defining basic macros
 %define term_base 0x9F80
+]] .. string.gsub([[
+%define term_height %height
+%define term_width %width
+ ]], "%%(%a+)", {["height"]=tostring(self.term_height), ["width"]=tostring(self.term_width)})
+ .. [[
 
 %eval term_input  term_base 0x00 +
 %eval term_raw    term_base 0x04 +
@@ -193,9 +201,9 @@ init:
     mov term_reg, 0x9F80
                               
     ld r0, term_reg                
-    mov r1, { 11 5 << }
+    mov r1, { term_width 1 - 5 << }
     st r1, term_hrange
-    mov r1, { 7 5 << }
+    mov r1, { term_height 1 - 5 << }
     st r1, term_vrange
     mov r1, 0x1000
     st r1, term_cursor
@@ -296,7 +304,8 @@ CodeGen.use_def_map = {
     ["shr3"]=function(c) return {c.source, c.third}, {c.dest} end,
     ["xor"]=function(c) return {c.source, c.dest}, {c.dest} end,
     ["and"]=function(c) return {c.source, c.dest}, {c.dest} end,
-    ["or"]=function(c) return {c.source, c.dest}, {c.dest} end
+    ["or"]=function(c) return {c.source, c.dest}, {c.dest} end,
+    ["asm"]=function(c) return {}, {} end
 }
 setmetatable(CodeGen.use_def_map, {
     __index=function(t, x)

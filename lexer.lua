@@ -77,7 +77,7 @@ function Lexer.lex(s)
     floats = lpeg.Cp() * floats / function(pos, f) return Token:new(TOKEN_TYPES["FLOAT"], tonumber(f), get_pos(pos)) end
 
     -- Reserved words
-    local reserved = (lpeg.C(lpeg.P("if") + "else" + "for" + "while" + "return" + "break" + "continue" + "switch" + "case" + "default") * -loc.alnum) 
+    local reserved = (lpeg.C(lpeg.P("if") + "else" + "for" + "while" + "return" + "break" + "continue" + "switch" + "case" + "default" + "asm") * -loc.alnum) 
     reserved = lpeg.Cp() * reserved / function(pos, r) return Token:new(TOKEN_TYPES[string.upper(r)], r, get_pos(pos)) end
 
     -- Type specifiers
