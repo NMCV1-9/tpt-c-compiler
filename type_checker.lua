@@ -123,7 +123,6 @@ function Type_Checker:type_check(ast, symbol_table)
                 base_type = base(n.specifier.type_specifier.kind)
             end
         end
-
         n.value_type = base_type
 
         for _, declarator in ipairs(n.declarators) do

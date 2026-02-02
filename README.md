@@ -184,3 +184,36 @@ Displays a null-terminated array of characters.
 - **Returns**
   - `void`
 
+# Inline Assembly
+The Powder Toy Compiler provides basic support for inline assembly. The following EBNF-like pseudocode describes how to use this feature.
+
+```
+asm(
+    { <string-literal> }*
+    [: <inputs>]
+    [: <outputs>]
+    [: <clobbers>]
+    );
+```
+
+The inline assembly statement consists of the `asm` keyword following by a pair of parantheses containing the body of the statement.
+The statement body begins with zero or more assembly instructions in the form of string literals. Note that the compiler does not parse these instructions and instead simply copies them into the outputted assembly file. Additionally, three distinct kinds of optional operands are available that help to integrate the assembly snippet within the encompassing program.
+
+The inputs operand defines which variables (if any) should be copied into which registers. It takes the form of a list of register names assigned to variables accessible in the current scope. The compiler will ensure that the contents of the variables are copied to their corresponding registers.
+
+The outputs operand defines which variables (if any) should receive the output of the inline assembly statement. Like the input operand, it consists of a list of registers assigned to variables accessible in the current scope.
+
+The clobbers operand allows the compiler to preserve a set of registers. The registers are specified in a list.
+
+### Example Usage
+```c
+    int double_word_low = 0xffff, double_word_high = 0x8001;
+    int result;
+    asm(
+        "exhs r3, r0, r2"
+        "adds r3, r1"
+        :r1=double_word_low, r2=double_word_high
+        :r3=result
+        :r1, r2, r3
+    );
+  ```

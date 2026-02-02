@@ -783,7 +783,7 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
         end
 
         table.insert(tac[self.method.id], {type="asm", asm=n.asm})
-        
+
         if(n.outputs) then
             emit_asm_outputs(n.outputs)
         end

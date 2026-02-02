@@ -112,6 +112,7 @@ function Parser.parse(toks, symbol_table)
     function parse_declaration()
         local declaration_node = new("DECLARATION")
         declaration_node.specifier = parse_declaration_specifier()
+
         declaration_node.declarators = {}
         while (not (check(";") or declaration_node.block)) do
             local declarator = parse_declarator()
@@ -797,6 +798,9 @@ function Parser.parse(toks, symbol_table)
         local storage_class_specifier_node = new("STORAGE_CLASS_SPECIFIER")
         if(check("STORAGE_CLASS")) then
             storage_class_specifier_node.kind = next_token().value
+            if(storage_class_specifier_node.kind == "register" and symbol_table.current_scope.level == 0) then
+                Diagnostics.submit(Message.error("Register variables cannot have global scope", peek_token().pos))
+            end
         else
             storage_class_specifier_node.kind = "auto"
         end
