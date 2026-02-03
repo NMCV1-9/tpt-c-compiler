@@ -13,7 +13,8 @@ local symbol_table = {level=0, tag_symbols={}, ordinary_symbols={["NULL"]={type=
 ["set_cursor"]={type=Type.func(Type.base("VOID"), {Type.base("INT")}), place={is_standard_function=true, type="i",value="set_cursor"}},
 ["__send_raw"]={type=Type.func(Type.base("VOID"), {Type.base("INT"), Type.base("INT")}), place={is_standard_function=true, type="i",value="__send_raw"}},
 ["__set_zero_char"]={type=Type.func(Type.base("VOID"), {Type.base("INT"), Type.base("INT"), Type.base("INT"), Type.base("INT")}), place={is_standard_function=true, type="i",value="__set_zero_char"}},
-["__print_char_array"]={type=Type.func(Type.base("VOID"), {Type.pointer(Type.base("CHAR"))}), place={is_standard_function=true, is_variadic=false, type="i",value="__print_char_array"}}}}
+["__print_char_array"]={type=Type.func(Type.base("VOID"), {Type.pointer(Type.base("CHAR"))}), place={is_standard_function=true, is_variadic=false, type="i",value="__print_char_array"}},
+["vscroll"]={type=Type.func(Type.base("VOID"), {}), place={is_standard_function=true, type="i",value="vscroll"}}}}
 
 symbol_table.current_scope = symbol_table
 symbol_table.tag = "t"

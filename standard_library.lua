@@ -103,6 +103,11 @@ __scan_unsigned_int_not_digit:
     st %2, %1
     ret
 
+vscroll:
+    mov %1, ' '
+    st %1, term_raw
+    ret
+
 
 ]]
 

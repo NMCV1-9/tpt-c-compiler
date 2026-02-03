@@ -305,7 +305,7 @@ int main() {
     set_colour(0x7f);
     __set_zero_char(0x81ff, 0x8181, 0x8181, 0xff81);
     for(register int i = 0; i < 8; i++) {
-        __send_raw(0, 0x9F80 + 0x24);
+        __send_raw(0, 0x9F84);
     }
 
     set_cursor(0);

@@ -104,6 +104,17 @@ Displays a single character.
 
 ---
 
+## `void vscroll()`
+
+Shifts the terminal's contents upwards.
+
+- **Parameters**
+  - None.
+- **Returns**
+  - `void`
+
+---
+
 ## `char getchar()`
 
 Reads a single inputted character.

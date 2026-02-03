@@ -1428,8 +1428,7 @@ main:
 	jl .label_189
 	jmp .label_188
 	.label_189:
-	mov r2, 40868
-	mov r23, r2
+	mov r23, 40836
 	mov r22, 0
 	call __send_raw
 	.label_187:
@@ -1651,9 +1650,11 @@ main:
 	jmp .label_230
 	.label_231:
 	mov r1, 1
-	mov r2, r5
-	mull r2, 12
-	add r1, r2
+	mov r2, r1
+	mov r1, r5
+	mull r1, 12
+	add r2, r1
+	mov r1, r2
 	ld r1, r1, r6
 	cmp r1, 'F'
 	je .label_234
@@ -1882,6 +1883,11 @@ __scan_unsigned_int_loop:
     jmp __scan_unsigned_int_loop
 __scan_unsigned_int_not_digit:
     st r23, r22
+    ret
+
+vscroll:
+    mov r22, ' '
+    st r22, term_raw
     ret
 
 
