@@ -70,8 +70,8 @@ init:
 
 start:
     mov stack_pointer,4095
-	jmp main
-__scan_signed_int:
+	jmp __tptcc_fn_main
+__tptcc_fn___scan_signed_int:
 	push base_pointer
 	mov base_pointer, stack_pointer
 	push r1
@@ -81,7 +81,7 @@ __scan_signed_int:
 	push r5
 	mov r2, 0
 	mov r3, 1
-	call getchar
+	call __tptcc_fn_getchar
 	mov r3, return_reg
 	mov r1, r3
 	cmp r3, '-'
@@ -96,9 +96,9 @@ __scan_signed_int:
 	sub r2, '0'
 	.label_2:
 	mov r22, r1
-	call putchar
+	call __tptcc_fn_putchar
 	.label_3:
-	call getchar
+	call __tptcc_fn_getchar
 	mov r4, return_reg
 	mov r1, r4
 	cmp r4, '0'
@@ -111,7 +111,7 @@ __scan_signed_int:
 	jmp .label_4
 	.label_5:
 	mov r22, r1
-	call putchar
+	call __tptcc_fn_putchar
 	mull r2, 10
 	sub r1, '0'
 	add r2, r1
@@ -138,7 +138,7 @@ __scan_signed_int:
 	pop r1
 	pop base_pointer
 	ret
-show_bombs:
+__tptcc_fn_show_bombs:
 	push base_pointer
 	mov base_pointer, stack_pointer
 	push r1
@@ -172,16 +172,16 @@ show_bombs:
 	shl r1, 5
 	add r1, r3
 	mov r22, r1
-	call set_cursor
+	call __tptcc_fn_set_cursor
 	mov r22, 79
-	call set_colour
+	call __tptcc_fn_set_colour
 	mov r25, 39294
 	mov r24, 32511
 	mov r23, 53118
 	mov r22, 20121
-	call __set_zero_char
+	call __tptcc_fn_set_zero_char
 	mov r22, 0
-	call putchar
+	call __tptcc_fn_putchar
 	jmp .label_20
 	.label_18:
 	.label_20:
@@ -202,7 +202,7 @@ show_bombs:
 	pop r1
 	pop base_pointer
 	ret
-sweep_cell:
+__tptcc_fn_sweep_cell:
 	sub stack_pointer, 192
 	push base_pointer
 	mov base_pointer, stack_pointer
@@ -227,23 +227,23 @@ sweep_cell:
 	jge .label_22
 	jmp .label_21
 	.label_22:
-	call show_bombs
+	call __tptcc_fn_show_bombs
 	mov r22, 0
-	call set_cursor
+	call __tptcc_fn_set_cursor
 	mov r22, 4
-	call set_colour
+	call __tptcc_fn_set_colour
 	mov r3, 395
 	mov r22, r3
-	call __print_char_array
+	call __tptcc_fn_print_char_array
 	mov r22, 9
-	call set_colour
+	call __tptcc_fn_set_colour
 	mov r3, r1
 	shl r3, 5
 	add r3, r2
 	mov r22, r3
-	call set_cursor
+	call __tptcc_fn_set_cursor
 	mov r22, 0
-	call putchar
+	call __tptcc_fn_putchar
 	.label_24:
 	mov r3, 1
 	cmp r3, 0
@@ -290,13 +290,13 @@ sweep_cell:
 	shl r7, 5
 	add r7, r2
 	mov r22, r7
-	call set_cursor
+	call __tptcc_fn_set_cursor
 	mov r7, 289
 	add r7, r5
 	ld r22, r7
-	call set_colour
+	call __tptcc_fn_set_colour
 	mov r22, r6
-	call putchar
+	call __tptcc_fn_putchar
 	mov r6, r4
 	add r4, 1
 	cmp r5, 0
@@ -965,7 +965,7 @@ sweep_cell:
 	pop base_pointer
 	add stack_pointer, 192
 	ret
-add_to_surrounding_cells:
+__tptcc_fn_add_to_surrounding_cells:
 	push base_pointer
 	mov base_pointer, stack_pointer
 	push r1
@@ -1140,7 +1140,7 @@ add_to_surrounding_cells:
 	pop r1
 	pop base_pointer
 	ret
-main:
+__tptcc_fn_main:
 	sub stack_pointer, 2
 	push base_pointer
 	mov base_pointer, stack_pointer
@@ -1164,10 +1164,10 @@ main:
 	mov r1, 97
 	mov r2, 413
 	mov r22, r2
-	call __print_char_array
+	call __tptcc_fn_print_char_array
 	add r2, base_pointer, 1
 	push r2
-	call __scan_signed_int
+	call __tptcc_fn___scan_signed_int
 	add stack_pointer, 1
 	mov r2, return_reg
 	ld r2, base_pointer, 1
@@ -1175,31 +1175,31 @@ main:
 	sub r3, r2
 	mov r4, r3
 	mov r22, 14
-	call set_colour
+	call __tptcc_fn_set_colour
 	mov r3, 433
 	mov r22, r3
-	call __print_char_array
+	call __tptcc_fn_print_char_array
 	add r3, base_pointer, 2
 	push r3
-	call __scan_signed_int
+	call __tptcc_fn___scan_signed_int
 	add stack_pointer, 1
 	mov r3, return_reg
 	ld r3, base_pointer, 2
 	xor r3, 65535
 	add r3, 1
 	mov r22, 10
-	call putchar
+	call __tptcc_fn_putchar
 	mov r22, 136
-	call set_colour
+	call __tptcc_fn_set_colour
 	mov r22, 224
-	call set_cursor
+	call __tptcc_fn_set_cursor
 	mov r5, 477
 	mov r22, r5
-	call __print_char_array
+	call __tptcc_fn_print_char_array
 	mov r22, 224
-	call set_cursor
+	call __tptcc_fn_set_cursor
 	mov r22, 34
-	call set_colour
+	call __tptcc_fn_set_colour
 	mov r5, 0
 	.label_154:
 	mov r6, r5
@@ -1401,7 +1401,7 @@ main:
 	.label_177:
 	.label_179:
 	mov r22, '.'
-	call putchar
+	call __tptcc_fn_putchar
 	.label_155:
 	mov r6, r5
 	add r5, 1
@@ -1413,14 +1413,14 @@ main:
 	sub r2, r3
 	st r2, r1
 	mov r22, 0
-	call set_cursor
+	call __tptcc_fn_set_cursor
 	mov r22, 127
-	call set_colour
+	call __tptcc_fn_set_colour
 	mov r25, 65409
 	mov r24, 33153
 	mov r23, 33153
 	mov r22, 33279
-	call __set_zero_char
+	call __tptcc_fn_set_zero_char
 	mov r1, 0
 	.label_186:
 	mov r2, r1
@@ -1430,14 +1430,14 @@ main:
 	.label_189:
 	mov r23, 40836
 	mov r22, 0
-	call __send_raw
+	call __tptcc_fn_send_raw
 	.label_187:
 	mov r2, r1
 	add r1, 1
 	jmp .label_186
 	.label_188:
 	mov r22, 0
-	call set_cursor
+	call __tptcc_fn_set_cursor
 	mov r5, 0
 	mov r6, 0
 	mov r3, 1
@@ -1450,9 +1450,9 @@ main:
 	shl r1, 5
 	add r1, r6
 	mov r22, r1
-	call set_cursor
+	call __tptcc_fn_set_cursor
 	mov r22, 9
-	call set_colour
+	call __tptcc_fn_set_colour
 	mov r1, 1
 	mov r2, r5
 	mull r2, 12
@@ -1467,9 +1467,9 @@ main:
 	mov r24, 112
 	mov r23, 28672
 	mov r22, 28672
-	call __set_zero_char
+	call __tptcc_fn_set_zero_char
 	mov r22, 0
-	call putchar
+	call __tptcc_fn_putchar
 	jmp .label_195
 	.label_193:
 	mov r2, r1
@@ -1481,9 +1481,9 @@ main:
 	mov r24, 33153
 	mov r23, 33153
 	mov r22, 33279
-	call __set_zero_char
+	call __tptcc_fn_set_zero_char
 	mov r22, 0
-	call putchar
+	call __tptcc_fn_putchar
 	jmp .label_198
 	.label_196:
 	mov r2, r1
@@ -1495,9 +1495,9 @@ main:
 	mov r24, 32511
 	mov r23, 53118
 	mov r22, 20121
-	call __set_zero_char
+	call __tptcc_fn_set_zero_char
 	mov r22, 0
-	call putchar
+	call __tptcc_fn_putchar
 	jmp .label_201
 	.label_199:
 	mov r2, r1
@@ -1506,39 +1506,39 @@ main:
 	jmp .label_202
 	.label_203:
 	mov r22, r1
-	call putchar
+	call __tptcc_fn_putchar
 	jmp .label_204
 	.label_202:
 	mov r22, 144
-	call set_colour
+	call __tptcc_fn_set_colour
 	mov r22, ' '
-	call putchar
+	call __tptcc_fn_putchar
 	.label_204:
 	.label_201:
 	.label_198:
 	.label_195:
-	call getchar
+	call __tptcc_fn_getchar
 	mov r2, return_reg
 	mov r7, r2
 	mov r2, r5
 	shl r2, 5
 	add r2, r6
 	mov r22, r2
-	call set_cursor
+	call __tptcc_fn_set_cursor
 	mov r2, r1
 	cmp r2, 'F'
 	je .label_206
 	jmp .label_205
 	.label_206:
 	mov r22, 79
-	call set_colour
+	call __tptcc_fn_set_colour
 	mov r25, 127
 	mov r24, 112
 	mov r23, 28672
 	mov r22, 28672
-	call __set_zero_char
+	call __tptcc_fn_set_zero_char
 	mov r22, 0
-	call putchar
+	call __tptcc_fn_putchar
 	jmp .label_207
 	.label_205:
 	mov r2, r1
@@ -1547,14 +1547,14 @@ main:
 	jmp .label_208
 	.label_209:
 	mov r22, 127
-	call set_colour
+	call __tptcc_fn_set_colour
 	mov r25, 65409
 	mov r24, 33153
 	mov r23, 33153
 	mov r22, 33279
-	call __set_zero_char
+	call __tptcc_fn_set_zero_char
 	mov r22, 0
-	call putchar
+	call __tptcc_fn_putchar
 	jmp .label_210
 	.label_208:
 	mov r2, r1
@@ -1563,14 +1563,14 @@ main:
 	jmp .label_211
 	.label_212:
 	mov r22, 79
-	call set_colour
+	call __tptcc_fn_set_colour
 	mov r25, 39294
 	mov r24, 32511
 	mov r23, 53118
 	mov r22, 20121
-	call __set_zero_char
+	call __tptcc_fn_set_zero_char
 	mov r22, 0
-	call putchar
+	call __tptcc_fn_putchar
 	jmp .label_213
 	.label_211:
 	mov r2, 289
@@ -1578,9 +1578,9 @@ main:
 	sub r8, '0'
 	add r2, r8
 	ld r22, r2
-	call set_colour
+	call __tptcc_fn_set_colour
 	mov r22, r1
-	call putchar
+	call __tptcc_fn_putchar
 	.label_213:
 	.label_210:
 	.label_207:
@@ -1725,7 +1725,7 @@ main:
 	push r1
 	push r6
 	push r5
-	call add_to_surrounding_cells
+	call __tptcc_fn_add_to_surrounding_cells
 	add stack_pointer, 3
 	jmp .label_248
 	.label_246:
@@ -1736,7 +1736,7 @@ main:
 	.label_245:
 	push r6
 	push r5
-	call sweep_cell
+	call __tptcc_fn_sweep_cell
 	add stack_pointer, 2
 	ld r1, 298
 	cmp r1, r4
@@ -1744,12 +1744,12 @@ main:
 	jmp .label_249
 	.label_250:
 	mov r22, 0
-	call set_cursor
+	call __tptcc_fn_set_cursor
 	mov r22, 2
-	call set_colour
+	call __tptcc_fn_set_colour
 	mov r1, 490
 	mov r22, r1
-	call __print_char_array
+	call __tptcc_fn_print_char_array
 	mov return_reg, 0
 	jmp .exit_main
 	jmp .label_251
@@ -1783,7 +1783,7 @@ main:
 	pop base_pointer
 	add stack_pointer, 2
 	hlt
-__print_unsigned_int:
+__tptcc_fn_print_unsigned_int:
 	test r22, r22
 	jnz .__print_unsigned_int_not_zero
 	mov r22, '0'
@@ -1815,7 +1815,7 @@ __print_unsigned_int:
 .__print_unsigned_int_buf:
 	dw 0, 0, 0, 0, 0
 
-__print_signed_int:
+__tptcc_fn_print_signed_int:
     cmp r22, 0
     jge .__print_signed_int_not_negative
     mov r23, '-'
@@ -1823,38 +1823,38 @@ __print_signed_int:
 	xor r22, 65535
     add r22, 1
 .__print_signed_int_not_negative:
-    call __print_unsigned_int
+    call __tptcc_fn_print_unsigned_int
     ret
     
-__print_char_array:
+__tptcc_fn_print_char_array:
     ld r23, r22
     test r23, r23
-    jz __print_char_array_exit
+    jz .__print_char_array_exit
     st r23, term_print
     add r22, 1
-    jmp __print_char_array
-__print_char_array_exit:
+    jmp __tptcc_fn_print_char_array
+.__print_char_array_exit:
     ret
 
-putchar:
+__tptcc_fn_putchar:
     st r22, term_print
     ret
 
-getchar:
+__tptcc_fn_getchar:
     ld return_reg, term_input
     test return_reg, return_reg
-    jz getchar
+    jz __tptcc_fn_getchar
     ret
 
-set_colour:
+__tptcc_fn_set_colour:
     st r22, term_colour
     ret
 
-__send_raw:
+__tptcc_fn_send_raw:
     st r22, r23
     ret
 
-__set_zero_char:
+__tptcc_fn_set_zero_char:
     exh r23, r0, r23
     mov r22, r23, r22
     st r22, term_print_e
@@ -1864,14 +1864,14 @@ __set_zero_char:
     ret
 
 
-set_cursor:
+__tptcc_fn_set_cursor:
     st r22, term_cursor
     ret
 
-__scan_unsigned_int:
+__tptcc_fn_scan_unsigned_int:
     mov r23, 0
 __scan_unsigned_int_loop:
-    call getchar
+    call __tptcc_fn_getchar
     st return_reg, term_print
     sub return_reg, '0'
     cmp return_reg, 9
@@ -1885,7 +1885,7 @@ __scan_unsigned_int_not_digit:
     st r23, r22
     ret
 
-vscroll:
+__tptcc_fn_vscroll:
     mov r22, ' '
     st r22, term_raw
     ret

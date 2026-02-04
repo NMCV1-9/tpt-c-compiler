@@ -1,7 +1,7 @@
 local Standard_Library = {}
 
 Standard_Library.code = [[
-__print_unsigned_int:
+__tptcc_fn_print_unsigned_int:
 	test %1, %1
 	jnz .__print_unsigned_int_not_zero
 	mov %1, '0'
@@ -33,7 +33,7 @@ __print_unsigned_int:
 .__print_unsigned_int_buf:
 	dw 0, 0, 0, 0, 0
 
-__print_signed_int:
+__tptcc_fn_print_signed_int:
     cmp %1, 0
     jge .__print_signed_int_not_negative
     mov %2, '-'
@@ -41,38 +41,38 @@ __print_signed_int:
 	xor %1, 65535
     add %1, 1
 .__print_signed_int_not_negative:
-    call __print_unsigned_int
+    call __tptcc_fn_print_unsigned_int
     ret
     
-__print_char_array:
+__tptcc_fn_print_char_array:
     ld %2, %1
     test %2, %2
-    jz __print_char_array_exit
+    jz .__print_char_array_exit
     st %2, term_print
     add %1, 1
-    jmp __print_char_array
-__print_char_array_exit:
+    jmp __tptcc_fn_print_char_array
+.__print_char_array_exit:
     ret
 
-putchar:
+__tptcc_fn_putchar:
     st %1, term_print
     ret
 
-getchar:
+__tptcc_fn_getchar:
     ld return_reg, term_input
     test return_reg, return_reg
-    jz getchar
+    jz __tptcc_fn_getchar
     ret
 
-set_colour:
+__tptcc_fn_set_colour:
     st %1, term_colour
     ret
 
-__send_raw:
+__tptcc_fn_send_raw:
     st %1, %2
     ret
 
-__set_zero_char:
+__tptcc_fn_set_zero_char:
     exh %2, r0, %2
     mov %1, %2, %1
     st %1, term_print_e
@@ -82,14 +82,14 @@ __set_zero_char:
     ret
 
 
-set_cursor:
+__tptcc_fn_set_cursor:
     st %1, term_cursor
     ret
 
-__scan_unsigned_int:
+__tptcc_fn_scan_unsigned_int:
     mov %2, 0
 __scan_unsigned_int_loop:
-    call getchar
+    call __tptcc_fn_getchar
     st return_reg, term_print
     sub return_reg, '0'
     cmp return_reg, 9
@@ -103,7 +103,7 @@ __scan_unsigned_int_not_digit:
     st %2, %1
     ret
 
-vscroll:
+__tptcc_fn_vscroll:
     mov %1, ' '
     st %1, term_raw
     ret

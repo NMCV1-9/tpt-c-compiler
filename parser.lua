@@ -611,9 +611,11 @@ function Parser.parse(toks, symbol_table)
 
     function parse_return()
         local return_node = new("RETURN")
-        next_token()
-        return_node.value = parse_expression()
-
+        expect("RETURN")
+        if(not check(";")) then
+            return_node.value = parse_expression()
+        end
+        
         return return_node
     end
 

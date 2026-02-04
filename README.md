@@ -106,7 +106,7 @@ Displays a single character.
 
 ## `void vscroll()`
 
-Shifts the terminal's contents upwards.
+Shifts the terminal's content upwards.
 
 - **Parameters**
   - None.

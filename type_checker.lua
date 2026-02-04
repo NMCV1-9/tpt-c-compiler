@@ -348,7 +348,17 @@ function Type_Checker:type_check(ast, symbol_table)
 
 
     function check_return(n)
-        return check_expression(n.value)
+        if(n.value) then
+            return check_expression(n.value)
+        else
+            local function_symbol_table = symbol_table.get_encompassing_function()
+            local function_type = symbol_table.search_from_scope(function_symbol_table.parent, function_symbol_table.name, symbol_table.ordinary).type
+            assert(function_type.kind == Type.KINDS["FUNCTION"], "Symbol is not a function") -- Should never happen
+            if(not function_type.return_type.kind == Type.KINDS["VOID"]) then
+                Diagnostics.submit(Message.error("Return statement must return a value in this function", n.pos))
+            end
+            return base("VOID")
+        end
     end
 
     function array_coerce(type1, type2)

@@ -54,11 +54,11 @@ function IRVisitor:next_temp()
     return self.temp
 end
 
-function IRVisitor:next_global(size, l)
+function IRVisitor:next_global(size, l, id)
     local temp = self.global
     -- Update global_data table with the initial data list
     if l then
-        local data_entry = {idx=temp, list=l, next_entry=nil}
+        local data_entry = {idx=temp, list=l, next_entry=nil, id=id}
 
         if(self.global_data ~= nil) then
             self.global_data.next_entry = data_entry
@@ -311,7 +311,7 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
                 -- function definition
                 assert(self.method.id == "!global", "Nested function definitions are not supported")
                     
-                declarator.handle.place = operand.i(declarator.id.id)
+                declarator.handle.place = operand.i("__tptcc_fn_" .. declarator.id.id)
                 declarator.handle.local_size = 0
                 declarator.handle.id = declarator.id.id
                 if(not n.block) then -- ignore function prototypes
@@ -846,7 +846,7 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
         local end_label = operand.lb()
         local mark = #tac[self.method.id] + 1 -- horribly inefficient, will fix later
         table.insert(self.case_labels, {})
-        table.insert(self.loop_labels, {update_lb=end_label, end_lb=end_label})
+        table.insert(self.loop_labels, {update_lb=nil, end_lb=end_label})
         emit_block(n.block)
 
         -- handle the case labels
@@ -936,21 +936,38 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
     end
 
     function emit_break(n)
-        table.insert(tac[self.method.id], {type="jmp", target=self.loop_labels[#self.loop_labels].end_lb})
+        if(#self.loop_labels > 0) then
+            table.insert(tac[self.method.id], {type="jmp", target=self.loop_labels[#self.loop_labels].end_lb})
+        else
+            Diagnostics.submit(Message.error("Break statement must either be inside a loop or a switch statement", n.pos))
+        end
     end
 
     function emit_continue(n)
-        table.insert(tac[self.method.id], {type="jmp", target=self.loop_labels[#self.loop_labels].update_lb})
+        local update_lb = nil
+        local i = #self.loop_labels
+        while(i > 0 and not update_lb) do
+            update_lb = self.loop_labels[i].update_lb
+            i = i - 1
+        end
+
+        if(update_lb) then
+            table.insert(tac[self.method.id], {type="jmp", target=update_lb})
+        else
+            Diagnostics.submit(Message.error("Continue statement must be within a loop", n.pos))
+        end
     end
 
     function emit_return(n)
-        emit_expression(n.value)
-        
-        if(lvalue_operands[n.value.place.type]) then
-            n.value.place = load_operand_into_register(n.value.place)
-        end
+        if(n.value) then
+            emit_expression(n.value)
+            
+            if(lvalue_operands[n.value.place.type]) then
+                n.value.place = load_operand_into_register(n.value.place)
+            end
 
-        table.insert(tac[self.method.id], {type="mov", source=n.value.place, dest=self.RETURN_REG})
+            table.insert(tac[self.method.id], {type="mov", source=n.value.place, dest=self.RETURN_REG}) -- TODO: change this to emit_move(). Not sure about side effects
+        end
         table.insert(tac[self.method.id], {type="jmp", target=operand.i(".exit_"..self.method.id)})
 
     end

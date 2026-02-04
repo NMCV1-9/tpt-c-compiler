@@ -228,7 +228,7 @@ start:
 
     code.tac["!global"] = nil
     if(code.tac["main"] ~= nil) then
-        gen = gen .. "\tjmp main\n"
+        gen = gen .. "\tjmp __tptcc_fn_main\n"
     else
         gen = gen .. "\thlt\n"
     end
@@ -238,7 +238,7 @@ start:
         self.current_method = self.symbol_table.get_symbol(method_id, symbol_table.ordinary)
         -- emit prologue
         method = self.symbol_table.get_symbol(method_id, symbol_table.ordinary)
-        gen = gen .. method_id .. ":\n"
+        gen = gen .. "__tptcc_fn_" .. method_id .. ":\n"
         if(method.local_size > 0) then
             gen = gen .. "\tsub stack_pointer, " .. method.local_size .. "\n"
         end
