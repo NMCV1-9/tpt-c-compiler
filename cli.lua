@@ -24,6 +24,10 @@ for arg_idx = 2, #arg - 1, 2 do
         codegen.global_addr = codegen.global_addr + offset
     elseif arg[arg_idx] == "--size" then
         local size = tonumber(arg[arg_idx + 1])
+        if(size < 1024) then
+            print("[WARNING] Size is less than 1024. Remember that the '--size' argument expects the total memory size, not the number of memory rows.")
+        end
+        
         if not size then
             error("Invalid size argument: '"..arg[arg_idx + 1].."'")
         end

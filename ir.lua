@@ -1208,10 +1208,12 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
             local pr = copy_place(load_operand_into_register(place))
             pr.type = "pr"
             return pr
+        elseif(place.type == "i") then
+            table.insert(tac[self.method.id], {type="mov", source=place, dest=pr})
         else
             print(place.type)
             print(tac[self.method.id][#tac[self.method.id]].type)
-            error()
+            error("Internal compiler error: Invalid place type in emit_dereference")
         end
         return pr
     end
