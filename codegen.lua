@@ -677,7 +677,14 @@ function CodeGen:peephole(tac)
         elseif(c.type == "jmp" and nc.type == "label" and c.target.value == nc.target.value) then
             table.remove(tac, i)
             removals = removals + 1
+        elseif(c.type == "mov" and nc.type == "cmp" and c.dest == nc.second and (c.source.type == "i" or c.source.type == "g")) then
+            if c.source.type == "g" then
+                c.source.value = self.global_addr + c.source.value
+            end
+            tac[i] = {type="cmp", first=nc.first, second=Operand:new("i", c.source.value)}
+            table.remove(tac, i + 1)
         end
+        
     end
     --print("[OPTIMIZER] Removed", removals, "instructions")
 end
