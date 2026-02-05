@@ -123,7 +123,7 @@ __tptcc_fn_vscroll:
     ret
 
 __tptcc_fn_set_terminal_mode:
-    st %1, term_reg
+    mov term_reg, %1
     ret
 
 __tptcc_fn_get_terminal_mode:
