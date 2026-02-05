@@ -85,6 +85,8 @@ Displays an unsigned integer.
 	-  `i` — The integer (interpreted as unsigned) to display
 - **Returns**
 	- `void`
+
+---
 	
 ## `void __print_signed_int(int i)`
 Displays a signed integer.
@@ -93,6 +95,8 @@ Displays a signed integer.
 	-  `i` — The integer (interpreted as signed) to display
 - **Returns**
 	- `void`
+
+---
 
 ## `void putchar(char c)`
 
@@ -160,7 +164,7 @@ Sets the background and foreground colour. The following built-in colours are li
 - **Returns**
   - `void`
 
-| COLOUR_NAME     | VALUE |
+| Colour Name     | Value |
 |-----------------|-------|
 | BLACK           | 0     |
 | DARK_BLUE       | 1     |
@@ -213,7 +217,7 @@ Sets the terminal’s mode. The following mode settings are listed below. The se
 - **Returns**
   - `void`
 
-| Terminal Setting                 | VALUE |
+| Terminal Setting                 | Value |
 |----------------------------------|-------|
 | TERM_ENABLE_NL                   | 0x20  |
 | TERM_ENABLE_TERM_MODE_SCROLL     | 0x10  |
