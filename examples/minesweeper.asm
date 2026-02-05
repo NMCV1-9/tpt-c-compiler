@@ -23,6 +23,7 @@
 %eval term_colour term_base 0x46 +
 %eval term_print_e term_base 0x40 +
 %eval term_print_o term_base 0x41 +
+%eval term_plot    term_base 0x60 +
 
 
 %macro push thing
@@ -54,9 +55,9 @@ jmp init
 global_data_section:
     dw 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 119, 121, 114, 124, 113, 116, 118, 117, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 75, 97, 98, 111, 111, 109, 33, 32, 89, 111, 117, 32, 108, 111, 115, 101, 33, 0, 35, 32, 111, 102, 32, 109, 105, 110, 101, 115, 10, 40, 54, 45, 49, 50, 41, 58, 32, 0, 10, 69, 110, 116, 101, 114, 32, 97, 10, 110, 117, 109, 98, 101, 114, 32, 116, 111, 10, 104, 101, 108, 112, 10, 114, 97, 110, 100, 111, 109, 105, 122, 101, 10, 40, 49, 45, 49, 48, 48, 41, 58, 32, 0, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 0, 89, 111, 117, 32, 119, 105, 110, 33, 0
 init:
-    mov term_reg, 0x9F80
+    mov term_reg, 0x25
                               
-    ld r0, term_reg                
+    ld r0, term_base              
     mov r1, { term_width 1 - 5 << }
     st r1, term_hrange
     mov r1, { term_height 1 - 5 << }
@@ -152,28 +153,27 @@ __tptcc_fn_show_bombs:
 	jl .label_13
 	jmp .label_12
 	.label_13:
-	mov r3, 0
+	mov r1, 0
 	.label_14:
-	mov r1, r3
-	cmp r1, 12
+	mov r3, r1
+	cmp r3, 12
 	jl .label_17
 	jmp .label_16
 	.label_17:
-	mov r1, 97
+	mov r3, 97
 	mov r4, r2
 	mull r4, 12
-	add r1, r4
-	ld r1, r1, r3
-	cmp r1, 9
+	add r3, r4
+	ld r3, r3, r1
+	cmp r3, 9
 	jge .label_19
 	jmp .label_18
 	.label_19:
-	mov r1, r2
-	shl r1, 5
-	add r1, r3
-	mov r22, r1
+	mov r23, r1
+	mov r22, r2
 	call __tptcc_fn_set_cursor
-	mov r22, 79
+	mov r23, 15
+	mov r22, 12
 	call __tptcc_fn_set_colour
 	mov r25, 39294
 	mov r24, 32511
@@ -186,8 +186,8 @@ __tptcc_fn_show_bombs:
 	.label_18:
 	.label_20:
 	.label_15:
-	mov r1, r3
-	add r3, 1
+	mov r3, r1
+	add r1, 1
 	jmp .label_14
 	.label_16:
 	.label_11:
@@ -228,19 +228,18 @@ __tptcc_fn_sweep_cell:
 	jmp .label_21
 	.label_22:
 	call __tptcc_fn_show_bombs
+	mov r23, 0
 	mov r22, 0
 	call __tptcc_fn_set_cursor
-	mov r22, 4
-	call __tptcc_fn_set_colour
+	mov r22, 12
+	call __tptcc_fn_set_text_colour
 	mov r3, 395
 	mov r22, r3
 	call __tptcc_fn_print_char_array
 	mov r22, 9
-	call __tptcc_fn_set_colour
-	mov r3, r1
-	shl r3, 5
-	add r3, r2
-	mov r22, r3
+	call __tptcc_fn_set_text_colour
+	mov r23, r2
+	mov r22, r1
 	call __tptcc_fn_set_cursor
 	mov r22, 0
 	call __tptcc_fn_putchar
@@ -286,15 +285,13 @@ __tptcc_fn_sweep_cell:
 	add r7, r8
 	add r7, r2
 	st r6, r7
-	mov r7, r1
-	shl r7, 5
-	add r7, r2
-	mov r22, r7
+	mov r23, r2
+	mov r22, r1
 	call __tptcc_fn_set_cursor
 	mov r7, 289
 	add r7, r5
 	ld r22, r7
-	call __tptcc_fn_set_colour
+	call __tptcc_fn_set_text_colour
 	mov r22, r6
 	call __tptcc_fn_putchar
 	mov r6, r4
@@ -981,57 +978,55 @@ __tptcc_fn_add_to_surrounding_cells:
 	ld r5, base_pointer, 3
 	mov r1, r4
 	sub r1, 1
-	mov r3, r1
-	mov r1, r5
-	sub r1, 1
-	mov r6, r1
-	mov r1, r4
-	add r1, 1
-	mov r7, r1
-	mov r1, r5
-	add r1, 1
-	mov r8, r1
-	mov r1, r4
-	cmp r1, 0
+	mov r2, r5
+	sub r2, 1
+	mov r6, r2
+	mov r2, r4
+	add r2, 1
+	mov r7, r2
+	mov r2, r5
+	add r2, 1
+	mov r8, r2
+	mov r2, r4
+	cmp r2, 0
 	jg .label_131
 	jmp .label_130
 	.label_131:
-	mov r1, r5
-	cmp r1, 0
+	mov r2, r5
+	cmp r2, 0
 	jg .label_134
 	jmp .label_133
 	.label_134:
-	mov r1, 97
-	mov r2, r3
-	mull r2, 12
-	add r1, r2
-	add r1, r6
-	ld r2, r1
+	mov r2, 97
+	mov r3, r1
+	mull r3, 12
+	add r2, r3
+	add r2, r6
+	ld r3, r2
 	ld r9, base_pointer, 4
-	add r2, r9
-	st r2, r1
+	add r3, r9
+	st r3, r2
 	jmp .label_135
 	.label_133:
 	.label_135:
-	mov r1, 97
-	mov r2, r3
-	mull r2, 12
-	add r1, r2
-	mov r2, r1
+	mov r2, 97
+	mov r3, r1
+	mull r3, 12
+	add r2, r3
 	add r2, r5
-	ld r9, r2
-	ld r1, base_pointer, 4
-	add r9, r1
-	st r9, r2
-	mov r1, r5
-	cmp r1, 11
+	ld r3, r2
+	ld r9, base_pointer, 4
+	add r3, r9
+	st r3, r2
+	mov r2, r5
+	cmp r2, 11
 	jl .label_137
 	jmp .label_136
 	.label_137:
-	mov r1, 97
-	mov r2, r3
-	mull r2, 12
-	add r1, r2
+	mov r2, 97
+	mull r1, 12
+	add r2, r1
+	mov r1, r2
 	add r1, r8
 	ld r2, r1
 	ld r3, base_pointer, 4
@@ -1175,7 +1170,7 @@ __tptcc_fn_main:
 	sub r3, r2
 	mov r4, r3
 	mov r22, 14
-	call __tptcc_fn_set_colour
+	call __tptcc_fn_set_text_colour
 	mov r3, 433
 	mov r22, r3
 	call __tptcc_fn_print_char_array
@@ -1189,16 +1184,20 @@ __tptcc_fn_main:
 	add r3, 1
 	mov r22, 10
 	call __tptcc_fn_putchar
-	mov r22, 136
+	mov r23, 8
+	mov r22, 8
 	call __tptcc_fn_set_colour
-	mov r22, 224
+	mov r23, 0
+	mov r22, 7
 	call __tptcc_fn_set_cursor
 	mov r5, 477
 	mov r22, r5
 	call __tptcc_fn_print_char_array
-	mov r22, 224
+	mov r23, 0
+	mov r22, 7
 	call __tptcc_fn_set_cursor
-	mov r22, 34
+	mov r23, 10
+	mov r22, 10
 	call __tptcc_fn_set_colour
 	mov r5, 0
 	.label_154:
@@ -1412,9 +1411,11 @@ __tptcc_fn_main:
 	mov r3, 9
 	sub r2, r3
 	st r2, r1
+	mov r23, 0
 	mov r22, 0
 	call __tptcc_fn_set_cursor
-	mov r22, 127
+	mov r23, 15
+	mov r22, 7
 	call __tptcc_fn_set_colour
 	mov r25, 65409
 	mov r24, 33153
@@ -1436,6 +1437,7 @@ __tptcc_fn_main:
 	add r1, 1
 	jmp .label_186
 	.label_188:
+	mov r23, 0
 	mov r22, 0
 	call __tptcc_fn_set_cursor
 	mov r5, 0
@@ -1446,13 +1448,11 @@ __tptcc_fn_main:
 	cmp r1, 0
 	je .label_191
 	.label_192:
-	mov r1, r5
-	shl r1, 5
-	add r1, r6
-	mov r22, r1
+	mov r23, r6
+	mov r22, r5
 	call __tptcc_fn_set_cursor
 	mov r22, 9
-	call __tptcc_fn_set_colour
+	call __tptcc_fn_set_text_colour
 	mov r1, 1
 	mov r2, r5
 	mull r2, 12
@@ -1509,7 +1509,8 @@ __tptcc_fn_main:
 	call __tptcc_fn_putchar
 	jmp .label_204
 	.label_202:
-	mov r22, 144
+	mov r23, 0
+	mov r22, 9
 	call __tptcc_fn_set_colour
 	mov r22, ' '
 	call __tptcc_fn_putchar
@@ -1520,17 +1521,16 @@ __tptcc_fn_main:
 	call __tptcc_fn_getchar
 	mov r2, return_reg
 	mov r7, r2
-	mov r2, r5
-	shl r2, 5
-	add r2, r6
-	mov r22, r2
+	mov r23, r6
+	mov r22, r5
 	call __tptcc_fn_set_cursor
 	mov r2, r1
 	cmp r2, 'F'
 	je .label_206
 	jmp .label_205
 	.label_206:
-	mov r22, 79
+	mov r23, 15
+	mov r22, 12
 	call __tptcc_fn_set_colour
 	mov r25, 127
 	mov r24, 112
@@ -1546,7 +1546,8 @@ __tptcc_fn_main:
 	je .label_209
 	jmp .label_208
 	.label_209:
-	mov r22, 127
+	mov r23, 15
+	mov r22, 7
 	call __tptcc_fn_set_colour
 	mov r25, 65409
 	mov r24, 33153
@@ -1562,7 +1563,8 @@ __tptcc_fn_main:
 	je .label_212
 	jmp .label_211
 	.label_212:
-	mov r22, 79
+	mov r23, 15
+	mov r22, 12
 	call __tptcc_fn_set_colour
 	mov r25, 39294
 	mov r24, 32511
@@ -1578,7 +1580,7 @@ __tptcc_fn_main:
 	sub r8, '0'
 	add r2, r8
 	ld r22, r2
-	call __tptcc_fn_set_colour
+	call __tptcc_fn_set_text_colour
 	mov r22, r1
 	call __tptcc_fn_putchar
 	.label_213:
@@ -1650,11 +1652,9 @@ __tptcc_fn_main:
 	jmp .label_230
 	.label_231:
 	mov r1, 1
-	mov r2, r1
-	mov r1, r5
-	mull r1, 12
-	add r2, r1
-	mov r1, r2
+	mov r2, r5
+	mull r2, 12
+	add r1, r2
 	ld r1, r1, r6
 	cmp r1, 'F'
 	je .label_234
@@ -1743,10 +1743,11 @@ __tptcc_fn_main:
 	jge .label_250
 	jmp .label_249
 	.label_250:
+	mov r23, 0
 	mov r22, 0
 	call __tptcc_fn_set_cursor
-	mov r22, 2
-	call __tptcc_fn_set_colour
+	mov r22, 10
+	call __tptcc_fn_set_text_colour
 	mov r1, 490
 	mov r22, r1
 	call __tptcc_fn_print_char_array
@@ -1805,7 +1806,7 @@ __tptcc_fn_print_unsigned_int:
 .__print_unsigned_int_print_int:
 	ld r22, r23, .__print_unsigned_int_buf
 	add r22, '0'
-	st r22, term_print
+	st r22, term_reg, term_base
 	add r23, 1
 	cmp r23, 5
 	jne .__print_unsigned_int_print_int
@@ -1819,7 +1820,7 @@ __tptcc_fn_print_signed_int:
     cmp r22, 0
     jge .__print_signed_int_not_negative
     mov r23, '-'
-    st r23, term_print
+    st r23, term_reg, term_base
 	xor r22, 65535
     add r22, 1
 .__print_signed_int_not_negative:
@@ -1830,14 +1831,14 @@ __tptcc_fn_print_char_array:
     ld r23, r22
     test r23, r23
     jz .__print_char_array_exit
-    st r23, term_print
+    st r23, term_reg, term_base
     add r22, 1
     jmp __tptcc_fn_print_char_array
 .__print_char_array_exit:
     ret
 
 __tptcc_fn_putchar:
-    st r22, term_print
+    st r22, term_reg, term_base
     ret
 
 __tptcc_fn_getchar:
@@ -1846,7 +1847,18 @@ __tptcc_fn_getchar:
     jz __tptcc_fn_getchar
     ret
 
+__tptcc_fn_getchar_nb:
+    ld return_reg, term_input
+    ret
+
 __tptcc_fn_set_colour:
+    ; r22 = background, r23 = foreground
+    shl r22, 4
+    add r22, r23
+    st r22, term_colour
+    ret
+
+__tptcc_fn_set_text_colour:
     st r22, term_colour
     ret
 
@@ -1865,6 +1877,9 @@ __tptcc_fn_set_zero_char:
 
 
 __tptcc_fn_set_cursor:
+    ; r22 = row, r23 = column
+    shl r22, 5
+    add r22, r23
     st r22, term_cursor
     ret
 
@@ -1872,7 +1887,7 @@ __tptcc_fn_scan_unsigned_int:
     mov r23, 0
 __scan_unsigned_int_loop:
     call __tptcc_fn_getchar
-    st return_reg, term_print
+    st return_reg, term_reg, term_base
     sub return_reg, '0'
     cmp return_reg, 9
     jg __scan_unsigned_int_not_digit
@@ -1890,4 +1905,17 @@ __tptcc_fn_vscroll:
     st r22, term_raw
     ret
 
+__tptcc_fn_set_terminal_mode:
+    st r22, term_reg
+    ret
 
+__tptcc_fn_get_terminal_mode:
+    mov return_reg, term_reg
+    ret
+
+__tptcc_fn_plot:
+    ; r22 = row, r23 = column, r24 = colour
+    shl r22, 8
+    add r22, r23
+    st r22, r24, term_plot
+    ret

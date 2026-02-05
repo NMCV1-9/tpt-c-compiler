@@ -8,6 +8,41 @@ Lexer.__index = Lexer
 -- C lexer
 
 
+-- very simple preprocessor
+-- not supported yet
+-- function substitute_includes(code)
+--     local lines = {}
+--     for line in code:gmatch("[^\r\n]+") do
+--         local includes = line:match("#include <(%w.+)>")
+--         if(includes) then
+--             local file = io.open("includes/" .. includes, "r")
+--             if(file) then
+--                 lines[#lines + 1] = file:read()
+--                 file:close()
+--             else
+--                 error("Library does not exist: " .. includes)
+--             end
+--         else
+--             includes = line:match("#include \"(%w.+)\"")
+--             if(includes) then
+--                 local file = io.open("includes/" .. includes, "r")
+--                 if(file) then
+--                     lines[#lines + 1] = substitute_includes(file:read())
+--                     file:close()
+--                 else
+--                     error("File does not exist: " .. includes)
+--                 end
+--             else
+--                 lines[#lines + 1] = line
+--             end
+--         end
+--     end
+
+    
+--     return table.concat(lines, "\n")
+
+-- end
+
 function Lexer.lex(s)
     local loc = lpeg.locale()
     local S = lpeg.S(" \n\t\r")^0
@@ -15,6 +50,9 @@ function Lexer.lex(s)
 
     local last_newline_pos = 0
     local rows = 1
+
+    local processed_code = {}
+    
 
     function check_for_escape_sequence(ch)
         local escape_map = {

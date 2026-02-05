@@ -123,6 +123,11 @@ function CodeGen:build_global_data_section()
     end
 
     local data_section = {}
+    -- add offset padding
+    for i=1, self.global_addr - 1 do 
+        table.insert(data_section, 0)
+    end
+
     for i=0, self.ir.global - 1 do
         if self.ir.global_data[i] ~= nil then
             table.insert(data_section, self.ir.global_data[i])
@@ -166,6 +171,7 @@ function CodeGen:generate(code, symbol_table)
 %eval term_colour term_base 0x46 +
 %eval term_print_e term_base 0x40 +
 %eval term_print_o term_base 0x41 +
+%eval term_plot    term_base 0x60 +
 
 
 %macro push thing
@@ -198,9 +204,9 @@ global_data_section:
     ]] .. self:build_global_data_section() .. [[
 
 init:
-    mov term_reg, 0x9F80
+    mov term_reg, 0x25
                               
-    ld r0, term_reg                
+    ld r0, term_base              
     mov r1, { term_width 1 - 5 << }
     st r1, term_hrange
     mov r1, { term_height 1 - 5 << }

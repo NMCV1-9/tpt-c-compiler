@@ -62,9 +62,11 @@ int __scan_char_array(char *str) {
 }
 
 
+// When this function was written, set_cursor could only move the cursor to the top left corner
+// Now, set_cursor can move the cursor to any position
+// The function is mostly left the same for historical preservation
 void move_cursor(int x, int y) {
-    // Idk how to configure the terminal properly so that set_cursor works predictably so this is fine for now
-    set_cursor(0);
+    set_cursor(0, 0);
     for(register int k = 0; k < y; ++k) {
         putchar('\n');
     }
@@ -74,11 +76,9 @@ void move_cursor(int x, int y) {
 }
 
 void clear_screen() {
-    set_cursor(0);
+    set_cursor(0, 0);
     __print_char_array("                                                                                                ");
 }
-
-enum Colour { YELLOW = 6, GREY = 8, GREEN = 2, WHITE = 15};
 
 int is_letter_in_word[26];
 int main() {
@@ -183,15 +183,15 @@ int main() {
             for(register int j = 0; j < 5; ++j) {
                 if(word[j] == query[j]) {
                     ++cnt;
-                    set_colour(GREEN);
+                    set_text_colour(GREEN);
                 }else if(is_letter_in_word[query[j] - 'a']) {
-                    set_colour(YELLOW);
+                    set_text_colour(YELLOW);
                 }else{
-                    set_colour(GREY);
+                    set_text_colour(GREY);
                 }
                 putchar(query[j]);
             }
-            set_colour(WHITE);
+            set_text_colour(WHITE);
             putchar('\n');
             // If every letter in the word is a match, the word has been found
             if(cnt == 5) {

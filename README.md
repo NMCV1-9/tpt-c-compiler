@@ -10,6 +10,7 @@ The compiler is roughly based around ANSI C89 although some C features have not 
 
 # Dependencies
 
+
 ### LPEG 1.1.0
 You can install this pattern matching library via luarocks or learn more about it [here](https://luarocks.org/modules/gvvaughan/lpeg)
 
@@ -126,6 +127,17 @@ Reads a single inputted character.
 
 ---
 
+## `char getchar_nb()`
+
+Reads a single inputted character. Unlike `getchar()`, this function does not wait until a character is entered.
+
+- **Parameters**
+  - None.
+- **Returns**
+  - The character read.
+
+---
+
 ## `void __scan_unsigned_int(int* out)`
 
 Reads an unsigned integer from the input and stores it in the provided integer
@@ -137,23 +149,102 @@ Reads an unsigned integer from the input and stores it in the provided integer
 
 ---
 
-## `void set_colour(int value)`
+## `void set_colour(int background, int foreground)`
 
-Sets the text colour.
+Sets the background and foreground colour. The following built-in colours are listed below
+|
 
 - **Parameters**
-  - `value` — Encoded colour value.
+  - `background` — Background colour
+  - `foreground` — Foreground colour
+- **Returns**
+  - `void`
+
+| COLOUR_NAME     | VALUE |
+|-----------------|-------|
+| BLACK           | 0     |
+| DARK_BLUE       | 1     |
+| DARK_GREEN      | 2     |
+| DARK_CYAN       | 3     |
+| DARK_RED        | 4     |
+| DARK_MAGENTA    | 5     |
+| DARK_YELLOW     | 6     |
+| GREY            | 7     |
+| DARK_GREY       | 8     |
+| BLUE            | 9     |
+| GREEN           | 10    |
+| CYAN            | 11    |
+| RED             | 12    |
+| MAGENTA         | 13    |
+| YELLOW          | 14    |
+| WHITE           | 15    |
+
+---
+
+## `void set_text_colour(int colour)`
+
+Sets the foreground colour. Note that this function may also modify the background colour if the colour input parameter is greater than 15.
+
+- **Parameters**
+  - `colour` — Colour to set foreground to.
 - **Returns**
   - `void`
 
 ---
 
-## `void set_cursor(int position)`
+## `void set_cursor(int row, int column)`
 
 Moves the cursor to a specified position.
 
 - **Parameters**
-  - `position` — Encoded cursor position.
+  - `row` — Row to move cursor to.
+  - `column` — Column to move cursor to.
+- **Returns**
+  - `void`
+
+---
+
+## `void set_terminal_mode(int mode)`
+
+Sets the terminal’s mode. The following mode settings are listed below. The semantics of these terminal modes are described [here](https://github.com/LBPHacker/R316/blob/v2/manual.md#scrollprint-sub-range-scroll-selection-and-print-character).
+
+- **Parameters**
+  - `mode` — The mode to set the terminal to.
+- **Returns**
+  - `void`
+
+| Terminal Setting                 | VALUE |
+|----------------------------------|-------|
+| TERM_ENABLE_NL                   | 0x20  |
+| TERM_ENABLE_TERM_MODE_SCROLL     | 0x10  |
+| TERM_ENABLE_SCROLLMASK           | 0x08  |
+| TERM_ENABLE_ROW_ORIENTED         | 0x04  |
+| TERM_ENABLE_ENABLE_COLOUR        | 0x02  |
+| TERM_ENABLE_TERM_MODE            | 0x01  |
+| TERM_DEFAULT                     | 0x25  |
+
+
+---
+
+## `int get_terminal_mode()`
+
+Retrieves the current terminal mode.
+
+- **Parameters**
+  - None.
+- **Returns**
+  - The current terminal mode.
+
+---
+
+## `void plot(int row, int column, int colour)`
+
+Sets the colour of a pixel at the specified terminal position.
+
+- **Parameters**
+  - `row` — The row of the pixel.
+  - `column` — The column of the pixel.
+  - `colour` — The colour value of the pixel.
 - **Returns**
   - `void`
 
@@ -165,8 +256,8 @@ Stores the value 'value' at the address represented by 'location'.
 This method is mostly only used for debugging or for efficient manipulation of the terminal.
 
 - **Parameters**
-  - `value` — Value to store
-  - `location` — Location to store the value at
+  - `value` — Value to store.
+  - `location` — Location to store the value at.
 - **Returns**
   - `void`
 

@@ -23,7 +23,7 @@ __tptcc_fn_print_unsigned_int:
 .__print_unsigned_int_print_int:
 	ld %1, %2, .__print_unsigned_int_buf
 	add %1, '0'
-	st %1, term_print
+	st %1, term_reg, term_base
 	add %2, 1
 	cmp %2, 5
 	jne .__print_unsigned_int_print_int
@@ -37,7 +37,7 @@ __tptcc_fn_print_signed_int:
     cmp %1, 0
     jge .__print_signed_int_not_negative
     mov %2, '-'
-    st %2, term_print
+    st %2, term_reg, term_base
 	xor %1, 65535
     add %1, 1
 .__print_signed_int_not_negative:
@@ -48,14 +48,14 @@ __tptcc_fn_print_char_array:
     ld %2, %1
     test %2, %2
     jz .__print_char_array_exit
-    st %2, term_print
+    st %2, term_reg, term_base
     add %1, 1
     jmp __tptcc_fn_print_char_array
 .__print_char_array_exit:
     ret
 
 __tptcc_fn_putchar:
-    st %1, term_print
+    st %1, term_reg, term_base
     ret
 
 __tptcc_fn_getchar:
@@ -64,7 +64,18 @@ __tptcc_fn_getchar:
     jz __tptcc_fn_getchar
     ret
 
+__tptcc_fn_getchar_nb:
+    ld return_reg, term_input
+    ret
+
 __tptcc_fn_set_colour:
+    ; %1 = background, %2 = foreground
+    shl %1, 4
+    add %1, %2
+    st %1, term_colour
+    ret
+
+__tptcc_fn_set_text_colour:
     st %1, term_colour
     ret
 
@@ -83,6 +94,9 @@ __tptcc_fn_set_zero_char:
 
 
 __tptcc_fn_set_cursor:
+    ; %1 = row, %2 = column
+    shl %1, 5
+    add %1, %2
     st %1, term_cursor
     ret
 
@@ -90,7 +104,7 @@ __tptcc_fn_scan_unsigned_int:
     mov %2, 0
 __scan_unsigned_int_loop:
     call __tptcc_fn_getchar
-    st return_reg, term_print
+    st return_reg, term_reg, term_base
     sub return_reg, '0'
     cmp return_reg, 9
     jg __scan_unsigned_int_not_digit
@@ -108,7 +122,20 @@ __tptcc_fn_vscroll:
     st %1, term_raw
     ret
 
+__tptcc_fn_set_terminal_mode:
+    st %1, term_reg
+    ret
 
+__tptcc_fn_get_terminal_mode:
+    mov return_reg, term_reg
+    ret
+
+__tptcc_fn_plot:
+    ; %1 = row, %2 = column, %3 = colour
+    shl %1, 8
+    add %1, %2
+    st %1, %3, term_plot
+    ret
 ]]
 
 return Standard_Library

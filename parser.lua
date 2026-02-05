@@ -187,7 +187,7 @@ function Parser.parse(toks, symbol_table)
             return parameter_list_node
         end
         table.insert(parameter_list_node, parse_parameter_declaration())
-        if(not parameter_list_node[1].declarator.id and parameter_list_node[1].type_specifier.kind[1] == "void") then
+        if(not parameter_list_node[1].declarator and parameter_list_node[1].type_specifier.kind[1] == "void") then
             parameter_list_node[1] = nil
             return parameter_list_node
         end

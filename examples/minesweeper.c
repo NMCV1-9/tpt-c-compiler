@@ -34,8 +34,8 @@ void show_bombs() {
     for(register int i = 0; i < 8; i++) {
         for(register int j = 0; j < 12; j++) {
             if(has_mine[i][j] >= 9) {
-                set_cursor((i << 5) + j);
-                set_colour(0x4f);
+                set_cursor(i, j);
+                set_colour(RED, WHITE);
                 __set_zero_char(0x4e99, 0xcf7e, 0x7eff, 0x997e);
                 putchar((char)0);
             }
@@ -48,11 +48,11 @@ void sweep_cell(int rowin, int colin) {
     register int col = colin;
     if(has_mine[row][col] >= 9) {
         show_bombs();
-        set_cursor(0);
-        set_colour(0x04);
+        set_cursor(0, 0);
+        set_text_colour(RED);
         __print_char_array("Kaboom! You lose!");
-        set_colour(0x09);
-        set_cursor((row << 5) + col);
+        set_text_colour(BLUE);
+        set_cursor(row, col);
         putchar(0);
         while(1) {}
     }
@@ -72,8 +72,8 @@ void sweep_cell(int rowin, int colin) {
 
         register int temp_char = num_mines + '0';
         board[row][col] = temp_char;
-        set_cursor((row << 5) + col);
-        set_colour(digit_colour[num_mines]);
+        set_cursor(row, col);
+        set_text_colour(digit_colour[num_mines]);
         putchar(temp_char);
         revealed_in_sweep++;
 
@@ -239,18 +239,18 @@ int main() {
     register int mines = mines_auto;
     register int cells_to_clear = 96 - mines;
     int num;
-    set_colour(0x0E);
+    set_text_colour(YELLOW);
     __print_char_array("\nEnter a\nnumber to\nhelp\nrandomize\n(1-100): ");
     __scan_signed_int(&num);
     register int rnum = -num;
     
     
     putchar('\n');
-    set_colour(0x88);
-    set_cursor(0xE0);
+    set_colour(DARK_GREY, DARK_GREY);
+    set_cursor(7, 0);
     __print_char_array("            ");
-    set_cursor(0xE0);
-    set_colour(0x22);
+    set_cursor(7, 0);
+    set_colour(GREEN, GREEN);
 
     for(register int i = 0; i < mines; i++) {
         rnum ^= (rnum + 1) << 3;
@@ -301,20 +301,20 @@ int main() {
         putchar('.');
     }
     has_mine[0][0] -= 9;
-    set_cursor(0);
-    set_colour(0x7f);
+    set_cursor(0, 0);
+    set_colour(GREY, WHITE);
     __set_zero_char(0x81ff, 0x8181, 0x8181, 0xff81);
     for(register int i = 0; i < 8; i++) {
         __send_raw(0, 0x9F84);
     }
 
-    set_cursor(0);
+    set_cursor(0, 0);
     register int row = 0;
     register int col = 0;
     register int is_first_sweep = 1;
     while(1) {
-        set_cursor((row << 5) + col);
-        set_colour(0x09);
+        set_cursor(row, col);
+        set_text_colour(BLUE);
         register char board_char = board[row][col];
         if(board_char == 'F') {
             __set_zero_char(0x7000, 0x7000, 0x70, 0x7f);
@@ -329,27 +329,27 @@ int main() {
             if(board_char != '0') {
                 putchar(board_char);
             } else {
-                set_colour(0x90);
+                set_colour(BLUE, BLACK);
                 putchar(' ');
             }
         }
         register int c = getchar();
-        set_cursor((row << 5) + col);
+        set_cursor(row, col);
         
         if(board_char == 'F') {
-            set_colour(0x4f);
+            set_colour(RED, WHITE);
             __set_zero_char(0x7000, 0x7000, 0x70, 0x7f);
             putchar((char)0);
         } else if(board_char == 0) {
-            set_colour(0x7f);
+            set_colour(GREY, WHITE);
             __set_zero_char(0x81ff, 0x8181, 0x8181, 0xff81);
             putchar((char)0);
         } else if(board_char == 'B') {
-            set_colour(0x4f);
+            set_colour(RED, WHITE);
             __set_zero_char(0x4e99, 0xcf7e, 0x7eff, 0x997e);
             putchar((char)0);
         } else {
-            set_colour(digit_colour[board_char - '0']);
+            set_text_colour(digit_colour[board_char - '0']);
             putchar(board_char);
         }
         
@@ -377,8 +377,8 @@ int main() {
             }
             sweep_cell(row, col);
             if(revealed_cells >= cells_to_clear) {
-                set_cursor(0);
-                set_colour(0x02);
+                set_cursor(0, 0);
+                set_text_colour(GREEN);
                 __print_char_array("You win!");
                 return 0;
             }

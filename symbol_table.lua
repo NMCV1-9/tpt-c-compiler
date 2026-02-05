@@ -3,18 +3,49 @@ local base = Type.base
 local pointer = Type.pointer
 local func = Type.func
 
+
+-- Not sure if this is the proper way to do this, but I preload the standard library into the symbol table
+
 local symbol_table = {level=0, tag_symbols={}, ordinary_symbols={["NULL"]={type=Type.pointer(Type.base("VOID")), place={type="i",value=0}},
     ["__print_unsigned_int"]={type=Type.func(Type.base("VOID"), {Type.base("INT")}), place={is_standard_function=true, type="i",value="__tptcc_fn_print_unsigned_int"}},
 ["__print_signed_int"]={type=Type.func(Type.base("VOID"), {Type.base("INT")}), place={is_standard_function=true, type="i",value="__tptcc_fn_print_signed_int"}},
 ["putchar"]={type=Type.func(Type.base("VOID"), {Type.base("CHAR")}), place={is_standard_function=true, type="i",value="__tptcc_fn_putchar"}},
 ["getchar"]={type=Type.func(Type.base("CHAR"), {}), place={is_standard_function=true, type="i",value="__tptcc_fn_getchar"}},
 ["__scan_unsigned_int"]={type=Type.func(Type.base("VOID"), {Type.pointer(Type.base("INT"))}), place={is_standard_function=true, type="i",value="__tptcc_fn_scan_unsigned_int"}},
-["set_colour"]={type=Type.func(Type.base("VOID"), {Type.base("INT")}), place={is_standard_function=true, type="i",value="__tptcc_fn_set_colour"}},
-["set_cursor"]={type=Type.func(Type.base("VOID"), {Type.base("INT")}), place={is_standard_function=true, type="i",value="__tptcc_fn_set_cursor"}},
+["set_colour"]={type=Type.func(Type.base("VOID"), {Type.base("INT"), Type.base("INT")}), place={is_standard_function=true, type="i",value="__tptcc_fn_set_colour"}},
+["set_cursor"]={type=Type.func(Type.base("VOID"), {Type.base("INT"), Type.base("INT")}), place={is_standard_function=true, type="i",value="__tptcc_fn_set_cursor"}},
 ["__send_raw"]={type=Type.func(Type.base("VOID"), {Type.base("INT"), Type.base("INT")}), place={is_standard_function=true, type="i",value="__tptcc_fn_send_raw"}},
 ["__set_zero_char"]={type=Type.func(Type.base("VOID"), {Type.base("INT"), Type.base("INT"), Type.base("INT"), Type.base("INT")}), place={is_standard_function=true, type="i",value="__tptcc_fn_set_zero_char"}},
 ["__print_char_array"]={type=Type.func(Type.base("VOID"), {Type.pointer(Type.base("CHAR"))}), place={is_standard_function=true, is_variadic=false, type="i",value="__tptcc_fn_print_char_array"}},
-["vscroll"]={type=Type.func(Type.base("VOID"), {}), place={is_standard_function=true, type="i",value="__tptcc_fn_vscroll"}}}}
+["vscroll"]={type=Type.func(Type.base("VOID"), {}), place={is_standard_function=true, type="i",value="__tptcc_fn_vscroll"}},
+["set_terminal_mode"]={type=Type.func(Type.base("VOID"), {Type.base("INT")}), place={is_standard_function=true, type="i",value="__tptcc_fn_set_terminal_mode"}},
+["get_terminal_mode"]={type=Type.func(Type.base("INT"), {}), place={is_standard_function=true, type="i",value="__tptcc_fn_get_terminal_mode"}},
+["set_text_colour"]={type=Type.func(Type.base("VOID"), {Type.base("INT")}), place={is_standard_function=true, type="i",value="__tptcc_fn_set_text_colour"}},
+["plot"]={type=Type.func(Type.base("VOID"), {Type.base("INT"), Type.base("INT"), Type.base("INT")}), place={is_standard_function=true, type="i",value="__tptcc_fn_plot"}},
+["BLACK"]={type=Type.base("INT"), place={type="i",value=0}},
+["DARK_BLUE"]={type=Type.base("INT"), place={type="i",value=1}},
+["DARK_GREEN"]={type=Type.base("INT"), place={type="i",value=2}},
+["DARK_CYAN"]={type=Type.base("INT"), place={type="i",value=3}},
+["DARK_RED"]={type=Type.base("INT"), place={type="i",value=4}},
+["DARK_MAGENTA"]={type=Type.base("INT"), place={type="i",value=5}},
+["DARK_YELLOW"]={type=Type.base("INT"), place={type="i",value=6}},
+["GREY"]={type=Type.base("INT"), place={type="i",value=7}},
+["DARK_GREY"]={type=Type.base("INT"), place={type="i",value=8}},
+["BLUE"]={type=Type.base("INT"), place={type="i",value=9}},
+["GREEN"]={type=Type.base("INT"), place={type="i",value=10}},
+["CYAN"]={type=Type.base("INT"), place={type="i",value=11}},
+["RED"]={type=Type.base("INT"), place={type="i",value=12}},
+["MAGENTA"]={type=Type.base("INT"), place={type="i",value=13}},
+["YELLOW"]={type=Type.base("INT"), place={type="i",value=14}},
+["WHITE"]={type=Type.base("INT"), place={type="i",value=15}},
+["TERM_ENABLE_NL"]={type=Type.base("INT"), place={type="i",value=0x20}},
+["TERM_ENABLE_TERM_MODE_SCROLL"]={type=Type.base("INT"), place={type="i",value=0x10}},
+["TERM_ENABLE_SCROLLMASK"]={type=Type.base("INT"), place={type="i",value=0x08}},
+["TERM_ENABLE_ROW_ORIENTED"]={type=Type.base("INT"), place={type="i",value=0x04}},
+["TERM_ENABLE_ENABLE_COLOUR"]={type=Type.base("INT"), place={type="i",value=0x02}},
+["TERM_ENABLE_TERM_MODE"]={type=Type.base("INT"), place={type="i",value=0x01}},
+["TERM_DEFAULT"]={type=Type.base("INT"), place={type="i",value=0x25}}}
+}
 
 symbol_table.current_scope = symbol_table
 symbol_table.tag = "t"
