@@ -617,7 +617,17 @@ function Type_Checker:type_check(ast, symbol_table)
                     Diagnostics.submit(Message.error("Relational expression terms must be ints", n[i].pos))
                 end
             end
-            n.value_type = base({is_signed(n) and "SIGNED" or "UNSIGNED", "INT"})
+            local signed = n[1].value_type.signed
+            for i = 2, #n - 1, 2 do
+                if (not signed or not n[i+1].value_type.signed) then
+                    n[i].value_type = base({"UNSIGNED", "INT"})
+                else
+                    n[i].value_type = base({"SIGNED", "INT"})
+                end
+
+                signed = true
+            end
+            n.value_type = base({"SIGNED", "INT"})
             return n.value_type
         else
             return check_shift_expression(n)
@@ -679,7 +689,7 @@ function Type_Checker:type_check(ast, symbol_table)
             for i=1, #n, 2 do
                 local factor = n[i]
                 local factor_type = check_cast_expression(factor)
-                if(factor_type.kind ~= Type.KINDS["INT"]) then
+                if(not can_coerce(factor_type, base("INT"))) then
                     Diagnostics.submit(Message.error("Can only multiply or divide an int by an int", factor.pos))
                 end
             end

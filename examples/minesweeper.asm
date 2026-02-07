@@ -70,7 +70,7 @@ init:
     st r1,  term_nlchar
 
 start:
-    mov stack_pointer,4095
+    mov stack_pointer,8191
 	jmp __tptcc_fn_main
 __tptcc_fn___scan_signed_int:
 	push base_pointer
@@ -1906,7 +1906,7 @@ __tptcc_fn_vscroll:
     ret
 
 __tptcc_fn_set_terminal_mode:
-    st r22, term_reg
+    mov term_reg, r22
     ret
 
 __tptcc_fn_get_terminal_mode:

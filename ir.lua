@@ -393,24 +393,24 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
                 n.place = emit_move(n.rhs.place, n.lhs.place) -- emit_move will return the source for optimization reasons
             elseif(n.op == "/=") then
                 local lhs_place = n.lhs.place
-                if(not reg_rvalue_operands[n.lhs.place.type]) then
-                    lhs_place = load_operand_into_register(n.lhs.place)
-                end
+                -- if(not reg_rvalue_operands[n.lhs.place.type]) then
+                --     lhs_place = load_operand_into_register(n.lhs.place)
+                -- end
                 local rhs_place = n.rhs.place
-                if(not reg_rvalue_operands[n.rhs.place.type]) then
-                    rhs_place = load_operand_into_register(n.rhs.place)
-                end
+                -- if(not reg_rvalue_operands[n.rhs.place.type]) then
+                --     rhs_place = load_operand_into_register(n.rhs.place)
+                -- end
                 local quotient = emit_division(lhs_place, rhs_place)
                 emit_move(quotient, n.lhs.place)
             elseif(n.op == "%=") then
                 local lhs_place = n.lhs.place
-                if(not reg_rvalue_operands[n.lhs.place.type]) then
-                    lhs_place = load_operand_into_register(n.lhs.place)
-                end
+                -- if(not reg_rvalue_operands[n.lhs.place.type]) then
+                --     lhs_place = load_operand_into_register(n.lhs.place)
+                -- end
                 local rhs_place = n.rhs.place
-                if(not reg_rvalue_operands[n.rhs.place.type]) then
-                    rhs_place = load_operand_into_register(n.rhs.place)
-                end
+                -- if(not reg_rvalue_operands[n.rhs.place.type]) then
+                --     rhs_place = load_operand_into_register(n.rhs.place)
+                -- end
                 local _, remainder = emit_division(lhs_place, rhs_place)
                 emit_move(remainder, n.lhs.place)
             else
@@ -564,12 +564,15 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
             local temp_place = load_operand_into_register(emit_bool_rvalue(n[1]))
             for i = 2, #n - 3, 2 do
                 local next_reg = load_operand_into_read_only_register(emit_bool_rvalue(n[i + 1]))
-                local jump_type = symbol_to_signed_comparison_type[n[i].value]
+                local signedness = n[i].value_type.signed
+                local jump_type = (signedness and symbol_to_signed_comparison_type[n[i].value] or symbol_to_unsigned_comparison_type[n[i].value])
                 emit_conditional_evaluation(temp_place, next_reg, temp_place, jump_type)
             end
             local next_reg = load_operand_into_read_only_register(emit_bool_rvalue(n[#n]))
             table.insert(tac[self.method.id], {type="cmp", first=temp_place, second=next_reg})
-            table.insert(tac[self.method.id], {type=symbol_to_signed_comparison_type[n[#n - 1].value], target=true_label})
+            local signedness = n[#n - 1].value_type.signed
+            local jump_type = (signedness and symbol_to_signed_comparison_type[n[#n - 1].value] or symbol_to_unsigned_comparison_type[n[#n - 1].value])
+            table.insert(tac[self.method.id], {type=jump_type, target=true_label})
             table.insert(tac[self.method.id], {type="jmp", target=false_label})
         else
             emit_shift_expression(n)
@@ -1063,14 +1066,14 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
             if(n[i-1].type == TOKEN_TYPES['*']) then
                 table.insert(tac[self.method.id], {type="mull", source = n[i].place, dest=n.place})
             elseif(n[i-1].type == TOKEN_TYPES['/']) then
-                if(n[i].place.type == "i") then
-                    n[i].place = load_operand_into_register(n[i].place)
-                end
+                -- if(n[i].place.type == "i") then
+                --     n[i].place = load_operand_into_register(n[i].place)
+                -- end
                 n.place = emit_division(n.place, n[i].place)
             elseif(n[i-1].type == TOKEN_TYPES['%']) then
-                if(n[i].place.type == "i") then
-                    n[i].place = load_operand_into_register(n[i].place)
-                end
+                -- if(n[i].place.type == "i") then
+                --     n[i].place = load_operand_into_register(n[i].place)
+                -- end
                 _, n.place = emit_division(n.place, n[i].place)
             end
         end
@@ -1078,6 +1081,48 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
 
     -- performs unsigned division using binary long division
     function emit_division(dividend, divisor)
+        if(not reg_rvalue_operands[dividend.type]) then
+            dividend = load_operand_into_register(dividend)
+        end
+
+        if(divisor.type == "i") then
+            return emit_fixed_point_division(dividend, divisor)
+        else
+            if(not reg_rvalue_operands[divisor.type]) then
+                divisor = load_operand_into_register(divisor)
+            end
+
+            return emit_long_division(dividend, divisor)
+        end
+    end
+
+    function emit_fixed_point_division(dividend, divisor)
+        assert(divisor.type == "i", "divisor must be an immediate")
+        assert(reg_rvalue_operands[dividend.type], "dividend must be an rvalue oriented operand in a register")
+
+        local fixed_point_factor = (1 << 16) // divisor.value
+        local quotient = operand.t()
+        local remainder = operand.t()
+        local end_label = operand.lb()
+        local instructions = {
+            {type="mulh", source=dividend, third=operand.i(fixed_point_factor), dest=quotient},
+            {type="mull3", source=quotient, third=divisor, dest=remainder},
+            {type="sub3", source=dividend, third=remainder, dest=remainder},
+            {type="cmp", first=remainder, second=divisor},
+            {type="ja", target=end_label}, -- ja is similar to jl since the operands are reversed
+            {type="add", source=operand.i(1), dest=quotient},
+            {type="sub", source=divisor, dest=remainder},
+            {type="label", target=end_label}
+        }
+
+        for _, instruction in ipairs(instructions) do
+            table.insert(tac[self.method.id], instruction)
+        end
+
+        return quotient, remainder
+    end
+
+    function emit_long_division(dividend, divisor)
         assert(reg_rvalue_operands[dividend.type], "dividend must be an rvalue oriented operand in a register")
         assert(reg_rvalue_operands[divisor.type], "divisor must be an rvalue oriented operand in a register")
 
