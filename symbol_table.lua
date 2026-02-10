@@ -18,6 +18,7 @@ local symbol_table = {level=0, tag_symbols={}, ordinary_symbols={["NULL"]={type=
 ["__set_zero_char"]={type=Type.func(Type.base("VOID"), {Type.base("INT"), Type.base("INT"), Type.base("INT"), Type.base("INT")}), place={is_standard_function=true, type="i",value="__tptcc_fn_set_zero_char"}},
 ["__print_char_array"]={type=Type.func(Type.base("VOID"), {Type.pointer(Type.base("CHAR"))}), place={is_standard_function=true, is_variadic=false, type="i",value="__tptcc_fn_print_char_array"}},
 ["vscroll"]={type=Type.func(Type.base("VOID"), {}), place={is_standard_function=true, type="i",value="__tptcc_fn_vscroll"}},
+["hscroll"]={type=Type.func(Type.base("VOID"), {}), place={is_standard_function=true, type="i",value="__tptcc_fn_hscroll"}},
 ["set_terminal_mode"]={type=Type.func(Type.base("VOID"), {Type.base("INT")}), place={is_standard_function=true, type="i",value="__tptcc_fn_set_terminal_mode"}},
 ["get_terminal_mode"]={type=Type.func(Type.base("INT"), {}), place={is_standard_function=true, type="i",value="__tptcc_fn_get_terminal_mode"}},
 ["set_text_colour"]={type=Type.func(Type.base("VOID"), {Type.base("INT")}), place={is_standard_function=true, type="i",value="__tptcc_fn_set_text_colour"}},

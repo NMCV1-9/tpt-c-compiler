@@ -120,6 +120,17 @@ Shifts the terminal's content upwards.
 
 ---
 
+## `void hscroll()`
+
+Shifts the terminal's content leftwards.
+
+- **Parameters**
+  - None.
+- **Returns**
+  - `void`
+
+---
+
 ## `char getchar()`
 
 Reads a single inputted character.
@@ -275,7 +286,7 @@ Uses 4 16 bit values to construct an 8x8 bitmap for the 0th character.
   - `left_low` — The 2 even columns on the left side of the bitmap
   - `left_high` — The 2 odd columns on the right side of the bitmap 
   - `right_low` — The 2 even columns on the right side of the bitmap
-  - `right_low` — The 2 odd columns on the right side of the bitmap
+  - `right_high` — The 2 odd columns on the right side of the bitmap
 - **Returns**
   - `void`
 

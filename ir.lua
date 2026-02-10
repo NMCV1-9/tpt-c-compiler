@@ -54,11 +54,11 @@ function IRVisitor:next_temp()
     return self.temp
 end
 
-function IRVisitor:next_global(size, l, id)
+function IRVisitor:next_global(size, l)
     local temp = self.global
     -- Update global_data table with the initial data list
     if l then
-        local data_entry = {idx=temp, list=l, next_entry=nil, id=id}
+        local data_entry = {idx=temp, list=l, next_entry=nil}
 
         if(self.global_data ~= nil) then
             self.global_data.next_entry = data_entry

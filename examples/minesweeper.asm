@@ -1905,6 +1905,11 @@ __tptcc_fn_vscroll:
     st r22, term_raw
     ret
 
+__tptcc_fn_hscroll:
+    mov r22, ' '
+    st r22, term_base
+    ret
+
 __tptcc_fn_set_terminal_mode:
     mov term_reg, r22
     ret
