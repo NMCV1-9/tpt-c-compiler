@@ -5,6 +5,7 @@ local util = require('util')
 local Type = require('type')
 local Diagnostics = require('diagnostics')
 local Message = require('message')
+local CodeGen = require('codegen')
 
 -- Intermediate representation code generation
 
@@ -167,22 +168,33 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
             elseif(node_check(element, "CHARACTER")) then
                 initialize_word(element.value, start)
             elseif(node_check(element, "STRING_LITERAL")) then
-                register_string_literal(element, start)
+                if(Type.same_type_chain(n.value_type, Type.pointer(Type.base("CHAR")))) then
+                    local global_place = operand.g(element.value_type.length)
+                    register_string_literal(element, global_place)
+                    initialize_word(global_place.value+CodeGen.global_addr, start)
+                else
+                    register_string_literal(element, start)
+                end
             else           
                 emit_assignment_expression(element)
                 emit_move(element.place, start)
             end
         elseif(node_check(n, "INITIALIZER_LIST")) then
-            for i, child in ipairs(n) do
-                if(n.value_type.kind == Type.KINDS["ARRAY"]) then
-                    child.value_type = n.value_type.points_to
-                elseif(n.value_type.kind == Type.KINDS["STRUCT"]) then
-                    child.value_type = n.value_type.members[i].type
-                elseif(n.value_type.kind == Type.KINDS["UNION"]) then
-                    child.value_type = Type.base("VOID")
+
+            if(Type.same_type_chain(n.value_type, Type.pointer(Type.base("CHAR")))) then
+                print("WOW")
+            else
+                for i, child in ipairs(n) do
+                    if(n.value_type.kind == Type.KINDS["ARRAY"]) then
+                        child.value_type = n.value_type.points_to
+                    elseif(n.value_type.kind == Type.KINDS["STRUCT"]) then
+                        child.value_type = n.value_type.members[i].type
+                    elseif(n.value_type.kind == Type.KINDS["UNION"]) then
+                        child.value_type = Type.base("VOID")
+                    end
+                    emit_static_initializer(child, start)
+                    start = Operand:new(start.type, start.value + self:sizeof(child.value_type))
                 end
-                emit_static_initializer(child, start)
-                start = Operand:new(start.type, start.value + self:sizeof(child.value_type))
             end
         end
     end
