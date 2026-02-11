@@ -136,10 +136,10 @@ __tptcc_fn_get_terminal_mode:
     ret
 
 __tptcc_fn_plot:
-    ; %1 = row, %2 = column, %3 = colour
-    shl %1, 8
-    add %1, %2
-    st %1, %3, term_plot
+    ; %1 = column/x, %2 = row/y, %3 = colour
+    shl %2, 8
+    add %2, %1
+    st %2, %3, term_plot
     ret
 ]]
 

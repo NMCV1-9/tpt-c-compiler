@@ -3,7 +3,7 @@
 
 A C compiler that emits TPTASM instructions specifically for [@lbphacker](https://github.com/lbphacker)'s R3 (a line of computers built in the simulation game "The Powder Toy")
 
-The compiler is roughly based around ANSI C89 although some C features have not been implemented yet. A basic standard library is included with the compiler. Read further for the standard library documentation.
+The compiler is roughly based on ANSI C89 although some C features have not been implemented yet. A basic standard library is included with the compiler. Read further for the standard library documentation.
 
   
   
@@ -18,7 +18,7 @@ You can install this pattern matching library via luarocks or learn more about i
 
 ### TPTASM 1.1.3
 
-First install The Powder Toy's [Script Manger](https://powdertoy.co.uk/Discussions/Thread/View.html?Thread=19400) or alternatively, just install [Jacob1's Mod](https://powdertoy.co.uk/Discussions/Thread/View.html?Thread=11117) which has the Script Manager pre-installed. TPTASM can be installed by downloading it from the Script Manager.
+First install The Powder Toy's [Script Manager](https://powdertoy.co.uk/Discussions/Thread/View.html?Thread=19400) or alternatively, just install [Jacob1's Mod](https://powdertoy.co.uk/Discussions/Thread/View.html?Thread=11117) which has the Script Manager pre-installed. TPTASM can be installed by downloading it from the Script Manager.
 
   
 
@@ -51,13 +51,13 @@ lua cli.lua input.c [--output output.asm] [--size total-memory-size] [--term-hei
 |-|:-:|:-:|
 |\-\-output|The name of the outputted .asm file|\<input-file-name\>.asm|
 |\-\-size|The total memory size in words or memory_rows * 128|2048|
-|\-\-term-height|The number of character rows in the terminal|8
+|\-\-term-height|The number of character rows in the terminal|8|
 |\-\-term-width|The number of character columns in the terminal|12|
 |\-\-offset|The global offset of the program in memory|0|
 
   
 
-This command should produce an assembly file. Keep track of the directory the file appears in and pass this directory to TPTASM using The Powder Toy's console (accessible via the keyboard shortcut "~" or the "C" icon in the GUI). Note that the R3 must be in the simulation area for the following command to work.
+This command should produce an assembly file. Keep track of the directory the file appears in and pass this file path to TPTASM using The Powder Toy's console (accessible via the keyboard shortcut "~" or the "C" icon in the GUI). Note that the R3 must be in the simulation area for the following command to work.
 
   
 
@@ -133,7 +133,7 @@ Shifts the terminal's content leftwards.
 
 ## `char getchar()`
 
-Reads a single inputted character.
+Reads a single entered character.
 
 - **Parameters**
   - None.
@@ -144,7 +144,7 @@ Reads a single inputted character.
 
 ## `char getchar_nb()`
 
-Reads a single inputted character. Unlike `getchar()`, this function does not wait until a character is entered.
+Reads a single entered character. Unlike `getchar()`, this function does not wait until a character is entered.
 
 - **Parameters**
   - None.
@@ -167,7 +167,6 @@ Reads an unsigned integer from the input and stores it in the provided integer
 ## `void set_colour(int background, int foreground)`
 
 Sets the background and foreground colour. The following built-in colours are listed below
-|
 
 - **Parameters**
   - `background` — Background colour
@@ -252,13 +251,13 @@ Retrieves the current terminal mode.
 
 ---
 
-## `void plot(int row, int column, int colour)`
+## `void plot(int x, int y, int colour)`
 
-Sets the colour of a pixel at the specified terminal position.
+Sets the colour of a pixel at the specified terminal position. The origin (0, 0) is located at the top left corner.
 
 - **Parameters**
-  - `row` — The row of the pixel.
-  - `column` — The column of the pixel.
+  - `x` — The x coordinate of the pixel.
+  - `y` — The y coordinate of the pixel.
   - `colour` — The colour value of the pixel.
 - **Returns**
   - `void`
@@ -267,7 +266,7 @@ Sets the colour of a pixel at the specified terminal position.
 
 ## `void __send_raw(int value, int location)`
 
-Stores the value 'value' at the address represented by 'location'.
+Stores the value `value` at the address represented by `location`.
 This method is mostly only used for debugging or for efficient manipulation of the terminal.
 
 - **Parameters**
@@ -283,10 +282,10 @@ This method is mostly only used for debugging or for efficient manipulation of t
 Uses 4 16 bit values to construct an 8x8 bitmap for the 0th character.
 
 - **Parameters**
-  - `left_low` — The 2 even columns on the left side of the bitmap
-  - `left_high` — The 2 odd columns on the right side of the bitmap 
-  - `right_low` — The 2 even columns on the right side of the bitmap
-  - `right_high` — The 2 odd columns on the right side of the bitmap
+  - `left_low` — The 2 even columns on the left side of the bitmap.
+  - `left_high` — The 2 odd columns on the left side of the bitmap.
+  - `right_low` — The 2 even columns on the right side of the bitmap.
+  - `right_high` — The 2 odd columns on the right side of the bitmap.
 - **Returns**
   - `void`
 
@@ -313,8 +312,8 @@ asm(
     );
 ```
 
-The inline assembly statement consists of the `asm` keyword following by a pair of parantheses containing the body of the statement.
-The statement body begins with zero or more assembly instructions in the form of string literals. Note that the compiler does not parse these instructions and instead simply copies them into the outputted assembly file. Additionally, three distinct kinds of optional operands are available that help to integrate the assembly snippet within the encompassing program.
+The inline assembly statement consists of the `asm` keyword followed by a pair of parentheses containing the body of the statement.
+The statement body begins with zero or more assembly instructions in the form of string literals. Note that the compiler does not parse these instructions and instead simply copies them into the output assembly file. Additionally, three distinct kinds of optional operands are available that help to integrate the assembly snippet within the encompassing program.
 
 The inputs operand defines which variables (if any) should be copied into which registers. It takes the form of a list of register names assigned to variables accessible in the current scope. The compiler will ensure that the contents of the variables are copied to their corresponding registers.
 

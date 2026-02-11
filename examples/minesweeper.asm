@@ -1919,8 +1919,8 @@ __tptcc_fn_get_terminal_mode:
     ret
 
 __tptcc_fn_plot:
-    ; r22 = row, r23 = column, r24 = colour
-    shl r22, 8
-    add r22, r23
-    st r22, r24, term_plot
+    ; r22 = column/x, r23 = row/y, r24 = colour
+    shl r23, 8
+    add r23, r22
+    st r23, r24, term_plot
     ret
