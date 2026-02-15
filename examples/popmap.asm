@@ -295,13 +295,14 @@ __tptcc_fn_show_cell:
 	je .label_7
 	jmp .label_6
 	.label_7:
-	mov r1, 3340
-	ld r2, base_pointer, 3
-	mull r2, 29
-	ld r3, base_pointer, 4
-	add r2, r3
+	mov r3, 3340
+	ld r1, base_pointer, 3
+	mull r1, 29
+	ld r2, base_pointer, 4
 	add r1, r2
-	ld r4, r1
+	mov r2, r3
+	add r2, r1
+	ld r4, r2
 	mov r1, 1561
 	mov r2, r4
 	cmp r2, 8192

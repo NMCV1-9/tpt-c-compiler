@@ -6,6 +6,10 @@ local type_checker = require("type_checker")
 local symbol_table = require("symbol_table")
 local util = require("util")
 
+if(_VERSION ~= "Lua 5.4") then
+    print("[WARNING] This compiler requires Lua 5.4. You are using Lua " .. _VERSION .. ". The compiler may not work as expected.")
+end
+
 local usage = "Usage: lua cli.lua input.c [--output output.asm] [--size total-memory-size] [--term-width width] [--term-height height] [--offset offset]" 
 if(#arg < 1) then
     print(usage)
