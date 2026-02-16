@@ -384,10 +384,10 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
     local symbol_to_unsigned_comparison_type = {
         ["=="] = "je",
         ["!="] = "jne",
-        ["<"] = "jb",
-        [">"] = "ja",
-        ["<="] = "jbe",
-        [">="] = "jae"
+        ["<"] = "jae",
+        [">"] = "jbe",
+        ["<="] = "ja",
+        [">="] = "jb"
     }
 
 
@@ -1407,7 +1407,7 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
         assert(lvalue_operands[place.type] or place.type == "i", "place must be an lvalue")
         assert(offset.type == "i", "offset must be an immediate value")
         if(place.type == "pr") then
-            table.insert(tac[self.method.id], {type="add", source=offset, dest=place})
+            table.insert(tac[self.method.id], {type="add", source=operand.i(offset.value * size), dest=place})
             return place
         else
             local mem_lvalue = copy_place(place)

@@ -153,24 +153,23 @@ __tptcc_fn_show_bombs:
 	jl .label_13
 	jmp .label_12
 	.label_13:
-	mov r3, 0
+	mov r1, 0
 	.label_14:
-	mov r1, r3
-	cmp r1, 12
+	mov r3, r1
+	cmp r3, 12
 	jl .label_17
 	jmp .label_16
 	.label_17:
-	mov r1, 97
+	mov r3, 97
 	mov r4, r2
 	mull r4, 12
-	add r1, r4
-	add r1, r3
-	ld r4, r1
-	cmp r4, 9
+	add r3, r4
+	ld r3, r3, r1
+	cmp r3, 9
 	jge .label_19
 	jmp .label_18
 	.label_19:
-	mov r23, r3
+	mov r23, r1
 	mov r22, r2
 	call __tptcc_fn_set_cursor
 	mov r23, 15
@@ -187,8 +186,8 @@ __tptcc_fn_show_bombs:
 	.label_18:
 	.label_20:
 	.label_15:
-	mov r1, r3
-	add r3, 1
+	mov r3, r1
+	add r1, 1
 	jmp .label_14
 	.label_16:
 	.label_11:
@@ -979,55 +978,55 @@ __tptcc_fn_add_to_surrounding_cells:
 	ld r5, base_pointer, 3
 	mov r1, r4
 	sub r1, 1
-	mov r2, r1
-	mov r1, r5
-	sub r1, 1
-	mov r6, r1
-	mov r1, r4
-	add r1, 1
-	mov r7, r1
-	mov r1, r5
-	add r1, 1
-	mov r8, r1
-	mov r1, r4
-	cmp r1, 0
+	mov r2, r5
+	sub r2, 1
+	mov r6, r2
+	mov r2, r4
+	add r2, 1
+	mov r7, r2
+	mov r2, r5
+	add r2, 1
+	mov r8, r2
+	mov r2, r4
+	cmp r2, 0
 	jg .label_131
 	jmp .label_130
 	.label_131:
-	mov r1, r5
-	cmp r1, 0
+	mov r2, r5
+	cmp r2, 0
 	jg .label_134
 	jmp .label_133
 	.label_134:
-	mov r1, 97
-	mov r3, r2
+	mov r2, 97
+	mov r3, r1
 	mull r3, 12
-	add r1, r3
-	add r1, r6
-	ld r3, r1
+	add r2, r3
+	add r2, r6
+	ld r3, r2
 	ld r9, base_pointer, 4
 	add r3, r9
-	st r3, r1
+	st r3, r2
 	jmp .label_135
 	.label_133:
 	.label_135:
-	mov r1, 97
-	mov r3, r2
+	mov r2, 97
+	mov r3, r1
 	mull r3, 12
-	add r1, r3
-	add r1, r5
-	ld r3, r1
+	add r2, r3
+	add r2, r5
+	ld r3, r2
 	ld r9, base_pointer, 4
 	add r3, r9
-	st r3, r1
-	mov r3, r5
-	cmp r3, 11
+	st r3, r2
+	mov r2, r5
+	cmp r2, 11
 	jl .label_137
 	jmp .label_136
 	.label_137:
-	mov r1, 97
-	mull r2, 12
-	add r1, r2
+	mov r2, 97
+	mull r1, 12
+	add r2, r1
+	mov r1, r2
 	add r1, r8
 	ld r2, r1
 	ld r3, base_pointer, 4
@@ -1662,11 +1661,9 @@ __tptcc_fn_main:
 	jmp .label_233
 	.label_234:
 	mov r1, 1
-	mov r2, r1
-	mov r1, r5
-	mull r1, 12
-	add r2, r1
-	mov r1, r2
+	mov r2, r5
+	mull r2, 12
+	add r1, r2
 	add r1, r6
 	mov r2, 0
 	st r2, r1
