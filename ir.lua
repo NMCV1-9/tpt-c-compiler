@@ -1056,6 +1056,24 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
         table.insert(tac[self.method.id], {type="add", source=source, dest=dest})
     end
 
+    function emit_abstract_sub(source, dest, size)
+
+        assert(reg_rvalue_operands[dest.type], "dest must be an rvalue oriented operand in a register")
+        assert(reg_rvalue_operands[source.type] or source.type == "i", "source must be rvalue oriented")
+
+        if(source.type == "i") then
+            source.value = source.value * size
+        else
+            if(size > 1) then
+                if(source.type == "vr") then
+                    source = load_operand_into_register(source)
+                end
+                table.insert(tac[self.method.id], {type="mull", source=operand.i(size), dest=source})
+            end
+        end
+        table.insert(tac[self.method.id], {type="sub", source=source, dest=dest})
+    end
+
     function emit_term(n)
         if(not node_check(n, "MULTIPLICATIVE_EXPRESSION")) then
             emit_cast_expression(n)
@@ -1360,6 +1378,18 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
                         local temp_reg = operand.t()
                         emit_move(next_reg, temp_reg)
                         emit_abstract_add(operand.i(1), next_reg, self:sizeof(n.value_types[i].points_to or n.value_types[i]))
+                        emit_move(next_reg, n.place)
+                        n.place = temp_reg
+                    end
+                elseif(operation.type == "--") then
+                    local next_reg = load_operand_into_register(n.place)
+                    if(reg_rvalue_operands[n.place.type]) then
+                        emit_abstract_sub(operand.i(1), n.place, self:sizeof(n.value_types[i].points_to or n.value_types[i]))
+                        n.place = next_reg
+                    else
+                        local temp_reg = operand.t()
+                        emit_move(next_reg, temp_reg)
+                        emit_abstract_sub(operand.i(1), next_reg, self:sizeof(n.value_types[i].points_to or n.value_types[i]))
                         emit_move(next_reg, n.place)
                         n.place = temp_reg
                     end

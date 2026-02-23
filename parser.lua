@@ -733,7 +733,7 @@ function Parser.parse(toks, symbol_table)
                 end
             end
         else
-            error(string.format("Invalid type specifier: '%s'", peek_token()))
+            Diagnostics.submit(Message.error(string.format("Invalid type specifier: '%s'", peek_token().value), peek_token().pos))
         end
 
         return type_specifier_node
