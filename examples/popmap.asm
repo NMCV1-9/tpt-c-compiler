@@ -8,8 +8,8 @@
 
 ; Initialization and defining basic macros
 %define term_base 0x9F80
-%define term_height 29
-%define term_width 29
+%define term_height 8
+%define term_width 12
  
 %eval term_input  term_base 0x00 +
 %eval term_raw    term_base 0x04 +

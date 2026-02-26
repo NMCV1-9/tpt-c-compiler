@@ -406,6 +406,9 @@ function Type_Checker:type_check(ast, symbol_table)
         elseif(type.kind == Type.KINDS["ARRAY"] and target.kind == Type.KINDS["POINTER"]) then
             return can_coerce(type.points_to, target.points_to, allow_greater_target_length)
         elseif(type.kind == Type.KINDS["ARRAY"] and target.kind == Type.KINDS["ARRAY"]) then
+            if((type.length < target.length and not allow_greater_target_length) or (type.length > target.length and not (target.length < 0))) then
+                return false
+            end
             return can_coerce(type.points_to, target.points_to, allow_greater_target_length)
         elseif(Type.is_base_type(type) and Type.is_base_type(target)) then
             if(type.kind == Type.KINDS["STRUCT"] and target.kind == Type.KINDS["STRUCT"]) then
