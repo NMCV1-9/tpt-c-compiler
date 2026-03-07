@@ -25,6 +25,28 @@ function Utils.split_string(str, delimiter)
     return result
 end
 
+function Utils.deep_copy(table)
+    if(type(table) ~= "table") then
+        return table
+    end
+    local copy = {}
+    for k, v in pairs(table) do
+        if(type(v) == "table") then
+            copy[k] = Utils.deep_copy(v)
+        else
+            copy[k] = v
+        end
+    end
+
+    return copy
+end
+
+function Utils.resize_list(list, size)
+    for i = #list, size + 1, -1 do
+        list[i] = nil
+    end
+end
+
 function Utils.to_int(str)
     if(string.sub(str, #str, #str) == "u") then
         return Utils.to_int(string.sub(str, 1, #str - 1))

@@ -1,6 +1,6 @@
 local Token = require("token")
 local util = require("util")
-local lpeg = require("lpeg")
+local lpeg = require("lipeg")
 
 local Lexer = {}
 Lexer.__index = Lexer
@@ -152,7 +152,10 @@ function Lexer.lex(s)
     local other = lpeg.Cp() * lpeg.C((lpeg.P(1) - lpeg.S(" \n\t\r"))^1) / function(pos, o) return Token:new(TOKEN_TYPES["OTHER"], o, get_pos(pos)) end
     -- LPEG is greedy so floats must be checked before integers else, integers will match the integer part of the float
     local token = S * ((singleline_comments + multiline_comments + reserved + storage_class + op +type_specifier + id + string_lit + character + hex_integers + integers + punctuation + other) * S)^1
-    tokens = {token:match(s)}
+    
+    local succ, p, tokens = token:match(s, 1, {size=0})
+    util.resize_list(tokens, tokens.size)
+
     setmetatable(tokens, {__tostring = function(s) return util.array_to_string(s, " ") end })
 
     table.insert(tokens, Token:new(TOKEN_TYPES["EOF"], "EOF", {row=#new_lines, col=1}))

@@ -36,16 +36,6 @@ function CodeGen:as_memory(operand)
     end
 end
 
-function CodeGen:get_offset_local_or_param(offset, local_size)
-    if(offset.type == "l") then
-        return operand.value + 1
-    elseif(offset.type == "p") then
-        return local_size + 2 + offset.value
-    else
-        error()
-    end
-end
-
 function CodeGen:as_parameter(operand)
     return "base_pointer, " .. (self.current_method.local_size + operand.value + 2) -- +2 for the return address and base pointer
 end
@@ -645,7 +635,7 @@ end
 function CodeGen:peephole(tac)
     -- Peephole optimization
     -- TODO: clean this up with some more general rules/algorithms
-
+    -- Low priority since the only real benefit would be reduction of repeated instructions
     local removals = 0
     local base_pointer = Operand:new("r", "base_pointer")
     for i = #tac - 1, 1, -1 do
@@ -678,10 +668,6 @@ function CodeGen:peephole(tac)
             end
         elseif(c.type == "add" and c.source.type == "i" and c.source.value == 0) then
             table.remove(tac, i)
-            removals = removals + 1
-        elseif(c.type == "add" and nc.type == "add" and (c.source.type == "l" or c.source.type == "p") and nc.source.type == "i" and c.dest == nc.dest) then
-            tac[i] = {type="add3", source = base_pointer, dest = c.dest, offset = operand.i(get_offset_local_or_param(c.source.value, self.current_method.local_size) + nc.source.value)}
-            table.remove(tac, i + 1)
             removals = removals + 1
         elseif(c.type == "add3" and nc.type == "add" and c.source.value == "base_pointer" and c.offset.type == "i" and nc.source.type == "i" and c.dest == nc.dest) then
             tac[i] = {type="add3", source = base_pointer, dest=c.dest, offset = Operand:new("i", c.offset.value + nc.source.value)}

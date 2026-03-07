@@ -14,8 +14,8 @@ The compiler is roughly based on ANSI C89 although some C features have not been
 This compiler was developed and tested using Lua 5.4. You can download Lua 5.4 binaries from [here](https://sourceforge.net/projects/luabinaries/files/5.4.8/Tools%20Executables/).
 
 
-### LPEG 1.1.0
-You can install this pattern matching library via luarocks or learn more about it [here](https://luarocks.org/modules/gvvaughan/lpeg)
+<!-- ### LPEG 1.1.0
+You can install this pattern matching library via luarocks or learn more about it [here](https://luarocks.org/modules/gvvaughan/lpeg) -->
 
   
 
