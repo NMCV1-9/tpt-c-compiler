@@ -9,73 +9,10 @@ local CodeGen = require('codegen')
 
 -- Intermediate representation code generation
 
-local IRVisitor = { tac = {["!global"]={}},
-                    temp = 0,
-                    global = 0,
-                    label = 0,
-                    global_data = {},
+local IRVisitor = {
                     types = {["INT"]=1, ["CHAR"]=1, ["VOID"]=1, ["POINTER"]=1}, -- size of the types
                     global_method = {id = "!global"},
-                    loop_labels = {},
-                    case_labels = {}
                     }
-IRVisitor.method = IRVisitor.global_method
-local operand = {
-    l=function(s, method) return Operand:new("l", IRVisitor:next_stack(s, method or IRVisitor.method)) end, -- local variable
-    p=function(v) return Operand:new("p", v) end,                   -- parameter
-    g=function(s, l) return Operand:new("g", IRVisitor:next_global(s, l)) end, -- global variable
-    pr=function() return Operand:new("pr", IRVisitor:next_temp()) end,
-    i=function(v) return Operand:new("i", v) end,                      -- immediate
-    t=function() return Operand:new("t", IRVisitor:next_temp()) end,    -- temporary    
-    r=function(v) return Operand:new("r", v) end,                        -- binded register
-    lb=function() return Operand:new("i", string.format(".label_%d", IRVisitor:next_label())) end, --label
-    vr=function() return Operand:new("vr", IRVisitor:next_temp()) end -- variable register (used for variables residing in registers), should not be confused with "virtual register"
-}
-IRVisitor.standard_function_arguments = {operand.r("r22"), operand.r("r23"), operand.r("r24"), operand.r("r25")}
-IRVisitor.RETURN_REG = operand.r("return_reg")
-IRVisitor.STACK_POINTER = operand.r("stack_pointer")
-IRVisitor.BASE_POINTER = operand.r("base_pointer")
-IRVisitor.__index = IRVisitor
-
-function IRVisitor:next_label()
-    local temp = self.label
-    self.label = self.label + 1
-    return temp
-end
-
-function IRVisitor:next_stack(size, method)
-    assert(method.local_size ~= nil, "Method local size is nil")
-    local result = method.local_size
-    method.local_size = result + size
-    return result
-end
-
-function IRVisitor:next_temp()
-    self.temp = self.temp + 1
-    return self.temp
-end
-
-function IRVisitor:next_global(size, l)
-    local temp = self.global
-    -- Update global_data table with the initial data list
-    if l then
-        local data_entry = {idx=temp, list=l, next_entry=nil}
-
-        if(self.global_data ~= nil) then
-            self.global_data.next_entry = data_entry
-        end
-
-        self.global_data = data_entry
-    end
-
-    self.global = temp + size
-    return temp
-end
-
-function IRVisitor:register_global_word(data, start)
-    self.global_data[start.value] = data
-end
-
 function IRVisitor:sizeof(type)
     local size = 1
     if (type == nil) then
@@ -91,22 +28,30 @@ function IRVisitor:sizeof(type)
     end
 
     assert(type ~= nil, "Base type is nil")
-    return self.types[Type.INVERTED_KINDS[type.kind]] * size
+    return IRVisitor.types[Type.INVERTED_KINDS[type.kind]] * size
 end
 
 
-function IRVisitor:generate_ir_code(ast, symbol_table)
+function IRVisitor.generate_ir_code(ast, symbol_table)
     local NODE_TYPES = Node.NODE_TYPES
     local TOKEN_TYPES = Token.TOKEN_TYPES
     local PLACE_TYPES = Operand.PLACE_TYPES
-    local tac = self.tac
-    local global_method = self.global_method
+    local global_method = IRVisitor.global_method
+    local tac = {[global_method.id] = {}}
     local get_symbol = symbol_table.get_symbol
     local set_symbol = symbol_table.set_symbol
     local new_scope = symbol_table.new_scope
     local exit_scope = symbol_table.exit_scope
 
     local node_check = Node.node_check
+
+    local global_data = {}
+    local label = 0
+    local temp = 0
+    local global = 0
+    local loop_labels = {}
+    local case_labels = {}
+    local current_method = global_method
 
     -- lvalue, in register = pr
     -- lvalue, not in register = l p g
@@ -124,6 +69,62 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
         ["RELATIONAL_EXPRESSION"] = 1,
         ["EQUALITY_EXPRESSION"] = 1
     }
+
+    local operand = {
+        l=function(s, method) return Operand:new("l", next_stack(s, method or current_method)) end, -- local variable
+        p=function(v) return Operand:new("p", v) end,                   -- parameter
+        g=function(s, l) return Operand:new("g", next_global(s, l)) end, -- global variable
+        pr=function() return Operand:new("pr", next_temp()) end,
+        i=function(v) return Operand:new("i", v) end,                      -- immediate
+        t=function() return Operand:new("t", next_temp()) end,    -- temporary    
+        r=function(v) return Operand:new("r", v) end,                        -- binded register
+        lb=function() return Operand:new("i", string.format(".label_%d", next_label())) end, --label
+        vr=function() return Operand:new("vr", next_temp()) end -- variable register (used for variables residing in registers), should not be confused with "virtual register"
+    }
+
+    local standard_function_arguments = {operand.r("r22"), operand.r("r23"), operand.r("r24"), operand.r("r25")}
+    local RETURN_REG = operand.r("return_reg")
+    local STACK_POINTER = operand.r("stack_pointer")
+    local BASE_POINTER = operand.r("base_pointer")
+
+    function next_label()
+        local temp = label
+        label = label + 1
+        return temp
+    end
+    
+    function next_stack(size, method)
+        assert(method.local_size ~= nil, "Method local size is nil")
+        local result = method.local_size
+        method.local_size = result + size
+        return result
+    end
+    
+    function next_temp()
+        temp = temp + 1
+        return temp
+    end
+
+    function next_global(size, l)
+        local temp = global
+        -- Update global_data table with the initial data list
+        if l then
+            local data_entry = {idx=temp, list=l, next_entry=nil}
+    
+            if(global_data ~= nil) then
+                global_data.next_entry = data_entry
+            end
+    
+            global_data = data_entry
+        end
+    
+        global = temp + size
+        return temp
+    end
+
+    function register_global_word(data, start)
+        global_data[start.value] = data
+    end
 
     function emit_program(n)
         for _, child in ipairs(n) do
@@ -148,7 +149,7 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
 
     function initialize_word(value, place)
         if(place.type == "g") then
-            self:register_global_word(value, place)
+            register_global_word(value, place)
         else
             emit_move(operand.i(value), place)
         end
@@ -193,7 +194,7 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
                         child.value_type = Type.base("VOID")
                     end
                     emit_static_initializer(child, start)
-                    start = Operand:new(start.type, start.value + self:sizeof(child.value_type))
+                    start = Operand:new(start.type, start.value + IRVisitor:sizeof(child.value_type))
                 end
             end
         end
@@ -211,14 +212,14 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
                 end]]
             end
 
-            self:register_global_word(char, start)
+            register_global_word(char, start)
             start = Operand:new(start.type, start.value + 1)
         end
     end
 
     function static_allocate_place(size)
         size = size or 1
-        if(self.method.id == "!global") then
+        if(current_method.id == "!global") then
             return operand.g(size)
         else
             return operand.l(size)
@@ -234,7 +235,7 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
             elseif(member.type.kind == Type.KINDS["UNION"]) then
                 compute_union_layout(member.type)
             end
-            offset = offset + self:sizeof(member.type)
+            offset = offset + IRVisitor:sizeof(member.type)
         end
         type.size = offset
         return type
@@ -249,7 +250,7 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
             elseif(member.type.kind == Type.KINDS["UNION"]) then
                 compute_union_layout(member.type)
             end
-            size = math.max(size, self:sizeof(member.type))
+            size = math.max(size, IRVisitor:sizeof(member.type))
         end
         type.size = size
         
@@ -290,18 +291,18 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
                                 Diagnostics.submit(Message.error("Cannot store aggregate type in register", declarator.initializer.pos))
                             end
                         else
-                            initializer_place = static_allocate_place(self:sizeof(declarator.initializer.value_type))
+                            initializer_place = static_allocate_place(IRVisitor:sizeof(declarator.initializer.value_type))
                         end
                     end
                     
                     emit_static_initializer(declarator.initializer, initializer_place)
                     if(node_check(declarator.initializer, "STRING_LITERAL") and declarator.value_type.kind == Type.KINDS["POINTER"]) then
                         place = static_allocate_place(1) -- pointer to object
-                        if(self.method.id == "!global" or node_check(declarator.initializer.value, "STRING_LITERAL")) then -- String literal must be included even for local variables
+                        if(current_method.id == "!global" or node_check(declarator.initializer.value, "STRING_LITERAL")) then -- String literal must be included even for local variables
                             initialize_word(initializer_place.value+1, place) -- +1 is to offset the initial jmp start instruction (poor design, might fix later)
                         else
                             local next_reg = operand.t()
-                            table.insert(tac[self.method.id], {type="!get_address", target=declarator.handle.place, dest=next_reg}) -- should probably just be place
+                            table.insert(tac[current_method.id], {type="!get_address", target=declarator.handle.place, dest=next_reg}) -- should probably just be place
                             emit_move(next_reg, declarator.handle.place)
                         end
                     else
@@ -315,13 +316,13 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
                             Diagnostics.submit(Message.error("Cannot store aggregate type in register", declarator.initializer.pos))
                         end
                     else
-                        place=static_allocate_place(self:sizeof(declarator.value_type)) -- no initializer
+                        place=static_allocate_place(IRVisitor:sizeof(declarator.value_type)) -- no initializer
                     end
                 end
                 declarator.handle.place = place
             else
                 -- function definition
-                assert(self.method.id == "!global", "Nested function definitions are not supported")
+                assert(current_method.id == "!global", "Nested function definitions are not supported")
                     
                 declarator.handle.place = operand.i("__tptcc_fn_" .. declarator.id.id)
                 declarator.handle.local_size = 0
@@ -329,12 +330,12 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
                 if(not n.block) then -- ignore function prototypes
                     return
                 end
-                self.method = declarator.handle
-                table.insert(tac, self.method.id)
-                tac[self.method.id] = {}
+                current_method = declarator.handle
+                table.insert(tac, current_method.id)
+                tac[current_method.id] = {}
                 
 
-                new_scope(self.method.id)
+                new_scope(current_method.id)
 
                 
                 for i, p in ipairs(declarator.direct_declarator.parameter_list or {}) do
@@ -347,7 +348,7 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
                     
                 end
                 exit_scope()
-                self.method = global_method
+                current_method = global_method
 
             end
         end
@@ -436,7 +437,7 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
                     rhs_place = load_operand_into_register(n.rhs.place)
                 end
                 local operation_type = symbol_to_operation_type[n.op]
-                table.insert(tac[self.method.id], {type=operation_type, source=rhs_place, dest=lhs_place})
+                table.insert(tac[current_method.id], {type=operation_type, source=rhs_place, dest=lhs_place})
                 if(lhs_place ~= n.lhs.place) then
                     emit_move(lhs_place, n.lhs.place)
                 end
@@ -468,12 +469,12 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
         local end_label = operand.lb()
         emit_bool_control_flow(n, true_label, false_label)
         local temp_place = operand.t()
-        table.insert(tac[self.method.id], {type="label", target=true_label})
-        table.insert(tac[self.method.id], {type="mov", source=operand.i(1), dest=temp_place})
-        table.insert(tac[self.method.id], {type="jmp", target=end_label})
-        table.insert(tac[self.method.id], {type="label", target=false_label})
-        table.insert(tac[self.method.id], {type="mov", source=operand.i(0), dest=temp_place})
-        table.insert(tac[self.method.id], {type="label", target=end_label})
+        table.insert(tac[current_method.id], {type="label", target=true_label})
+        table.insert(tac[current_method.id], {type="mov", source=operand.i(1), dest=temp_place})
+        table.insert(tac[current_method.id], {type="jmp", target=end_label})
+        table.insert(tac[current_method.id], {type="label", target=false_label})
+        table.insert(tac[current_method.id], {type="mov", source=operand.i(0), dest=temp_place})
+        table.insert(tac[current_method.id], {type="label", target=end_label})
         return temp_place
     end
 
@@ -492,9 +493,9 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
             end
         else
             local temp_place = load_operand_into_read_only_register(emit_bool_rvalue(n))
-            table.insert(tac[self.method.id], {type="cmp", first=temp_place, second=operand.i(0)})
-            table.insert(tac[self.method.id], {type="je", target=false_label})
-            table.insert(tac[self.method.id], {type="jmp", target=true_label})
+            table.insert(tac[current_method.id], {type="cmp", first=temp_place, second=operand.i(0)})
+            table.insert(tac[current_method.id], {type="je", target=false_label})
+            table.insert(tac[current_method.id], {type="jmp", target=true_label})
         end
     end
 
@@ -510,7 +511,7 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
             for i = 1, #n-1 do
                 local temp_true_label = operand.lb()
                 emit_bool_control_flow(n[i], temp_true_label, false_label)
-                table.insert(tac[self.method.id], {type="label", target=temp_true_label})
+                table.insert(tac[current_method.id], {type="label", target=temp_true_label})
             end
             emit_bool_control_flow(n[#n], true_label, false_label)
         else
@@ -524,7 +525,7 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
             for i = 1, #n - 1 do
                 local temp_false_label = operand.lb()
                 emit_bool_control_flow(n[i], true_label, temp_false_label)
-                table.insert(tac[self.method.id], {type="label", target=temp_false_label})
+                table.insert(tac[current_method.id], {type="label", target=temp_false_label})
             end
             emit_bool_control_flow(n[#n], true_label, false_label)
         else
@@ -545,9 +546,9 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
                 emit_conditional_evaluation(temp_place, next_reg, temp_place, jump_type)
             end
             local next_reg = load_operand_into_read_only_register(emit_bool_rvalue(n[#n]))
-            table.insert(tac[self.method.id], {type="cmp", first=temp_place, second=next_reg})
-            table.insert(tac[self.method.id], {type=symbol_to_signed_comparison_type[n[#n - 1].value], target=true_label})
-            table.insert(tac[self.method.id], {type="jmp", target=false_label})
+            table.insert(tac[current_method.id], {type="cmp", first=temp_place, second=next_reg})
+            table.insert(tac[current_method.id], {type=symbol_to_signed_comparison_type[n[#n - 1].value], target=true_label})
+            table.insert(tac[current_method.id], {type="jmp", target=false_label})
         else
             emit_relational_expression(n, true_label, false_label)
         end
@@ -556,19 +557,19 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
     function emit_conditional_evaluation(first, second, result_place, jump_type)
         local true_label = operand.lb()
         local end_label = operand.lb()
-        table.insert(tac[self.method.id], {type="cmp", first=first, second=second})
-        table.insert(tac[self.method.id], {type=jump_type, target=true_label})
+        table.insert(tac[current_method.id], {type="cmp", first=first, second=second})
+        table.insert(tac[current_method.id], {type=jump_type, target=true_label})
         emit_move(operand.i(0), result_place)
-        table.insert(tac[self.method.id], {type="jmp", target=end_label})
-        table.insert(tac[self.method.id], {type="label", target=true_label})
+        table.insert(tac[current_method.id], {type="jmp", target=end_label})
+        table.insert(tac[current_method.id], {type="label", target=true_label})
         emit_move(operand.i(1), result_place)
-        table.insert(tac[self.method.id], {type="label", target=end_label})
+        table.insert(tac[current_method.id], {type="label", target=end_label})
     end
 
     function emit_conditional_result_jump(result_place, true_label, false_label)
-        table.insert(tac[self.method.id], {type="cmp", first=result_place, second=operand.i(0)})
-        table.insert(tac[self.method.id], {type="je", target=false_label})
-        table.insert(tac[self.method.id], {type="jmp", target=true_label})
+        table.insert(tac[current_method.id], {type="cmp", first=result_place, second=operand.i(0)})
+        table.insert(tac[current_method.id], {type="je", target=false_label})
+        table.insert(tac[current_method.id], {type="jmp", target=true_label})
     end
 
     function emit_relational_expression(n, true_label, false_label)
@@ -581,11 +582,11 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
                 emit_conditional_evaluation(temp_place, next_reg, temp_place, jump_type)
             end
             local next_reg = load_operand_into_read_only_register(emit_bool_rvalue(n[#n]))
-            table.insert(tac[self.method.id], {type="cmp", first=temp_place, second=next_reg})
+            table.insert(tac[current_method.id], {type="cmp", first=temp_place, second=next_reg})
             local signedness = n[#n - 1].value_type.signed
             local jump_type = (signedness and symbol_to_signed_comparison_type[n[#n - 1].value] or symbol_to_unsigned_comparison_type[n[#n - 1].value])
-            table.insert(tac[self.method.id], {type=jump_type, target=true_label})
-            table.insert(tac[self.method.id], {type="jmp", target=false_label})
+            table.insert(tac[current_method.id], {type=jump_type, target=true_label})
+            table.insert(tac[current_method.id], {type="jmp", target=false_label})
         else
             emit_shift_expression(n)
         end
@@ -598,14 +599,14 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
             local true_label = operand.lb()
             local end_label = operand.lb()
             emit_bool_control_flow(n.condition, true_label, false_label)
-            table.insert(tac[self.method.id], {type="label", target=true_label})
+            table.insert(tac[current_method.id], {type="label", target=true_label})
             emit_assignment_expression(n.true_case)
             n.place = operand.t()
             emit_move(n.true_case.place, n.place)
-            table.insert(tac[self.method.id], {type="jmp", target=end_label})
-            table.insert(tac[self.method.id], {type="label", target=false_label})
+            table.insert(tac[current_method.id], {type="jmp", target=end_label})
+            table.insert(tac[current_method.id], {type="label", target=false_label})
             emit_move(emit_bool_rvalue(n.false_case), n.place)
-            table.insert(tac[self.method.id], {type="label", target=end_label})
+            table.insert(tac[current_method.id], {type="label", target=end_label})
         else
             n.place = copy_place(emit_bool_rvalue(n))
         end
@@ -619,7 +620,7 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
             for i = 2, #n do
                 emit_inclusive_xor_expression(n[i])
                 local next_reg = load_operand_into_register(n[i].place)
-                table.insert(tac[self.method.id], {type="or", source=next_reg, dest=n.place})
+                table.insert(tac[current_method.id], {type="or", source=next_reg, dest=n.place})
             end
         else
             emit_inclusive_xor_expression(n)
@@ -633,7 +634,7 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
             for i = 2, #n do
                 emit_inclusive_and_expression(n[i])
                 local next_reg = load_operand_into_register(n[i].place)
-                table.insert(tac[self.method.id], {type="xor", source=next_reg, dest=n.place})
+                table.insert(tac[current_method.id], {type="xor", source=next_reg, dest=n.place})
             end
         else
             emit_inclusive_and_expression(n)
@@ -647,7 +648,7 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
             for i = 2, #n do
                 emit_equality_expression(n[i])
                 local next_reg = load_operand_into_register(n[i].place)
-                table.insert(tac[self.method.id], {type="and", source=next_reg, dest=n.place})
+                table.insert(tac[current_method.id], {type="and", source=next_reg, dest=n.place})
             end
         else
             emit_equality_expression(n)
@@ -683,9 +684,9 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
                     next_reg = n[i].place
                 end
                 if(n[i - 1].type == TOKEN_TYPES['<<']) then
-                    table.insert(tac[self.method.id], {type="shl", source=next_reg, dest=n.place})
+                    table.insert(tac[current_method.id], {type="shl", source=next_reg, dest=n.place})
                 else -- logical right shift
-                    table.insert(tac[self.method.id], {type="shr", source=next_reg, dest=n.place})
+                    table.insert(tac[current_method.id], {type="shr", source=next_reg, dest=n.place})
                 end
             end
         else
@@ -729,11 +730,11 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
 
 
         if(not is_source_mem and not is_dest_mem) then
-            table.insert(tac[self.method.id], {type="mov", source=source, dest=dest})
+            table.insert(tac[current_method.id], {type="mov", source=source, dest=dest})
         elseif(not is_source_mem and is_dest_mem) then
-            table.insert(tac[self.method.id], {type="st", source=source, dest=dest})
+            table.insert(tac[current_method.id], {type="st", source=source, dest=dest})
         elseif(is_source_mem and not is_dest_mem) then
-            table.insert(tac[self.method.id], {type="ld", source=source, dest=dest})
+            table.insert(tac[current_method.id], {type="ld", source=source, dest=dest})
         else
             -- source and dest are both memory based operands
             local t = load_operand_into_register(source) -- copy source and then store it
@@ -753,10 +754,10 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
     function emit_statement(n)
         if(n.child.type == NODE_TYPES["DECLARATION"]) then
             if(n.child.specifier.storage_class.kind == "static") then
-                local temp_method = self.method
-                self.method = self.global_method
+                local temp_method = current_method
+                current_method = global_method
                 emit_declaration(n.child)
-                self.method = temp_method
+                current_method = temp_method
             else
                 emit_declaration(n.child)
             end
@@ -797,7 +798,7 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
             emit_asm_inputs(n.inputs)
         end
 
-        table.insert(tac[self.method.id], {type="asm", asm=n.asm})
+        table.insert(tac[current_method.id], {type="asm", asm=n.asm})
 
         if(n.outputs) then
             emit_asm_outputs(n.outputs)
@@ -809,13 +810,13 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
 
     function emit_asm_clobbers_push(n)
         for _, register in ipairs(n) do
-            table.insert(tac[self.method.id], {type="push", target=operand.r(register.id)})
+            table.insert(tac[current_method.id], {type="push", target=operand.r(register.id)})
         end
     end
     function emit_asm_clobbers_pop(n)
         for i = #n, 1, -1 do
             local register = n[i]
-            table.insert(tac[self.method.id], {type="pop", target=operand.r(register.id)})
+            table.insert(tac[current_method.id], {type="pop", target=operand.r(register.id)})
         end
     end
 
@@ -843,15 +844,15 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
         end
 
         local true_label = operand.lb()
-        table.insert(self.case_labels[#self.case_labels], {value=n.value.place, target=true_label})
-        table.insert(tac[self.method.id], {type="label", target=true_label})
+        table.insert(case_labels[#case_labels], {value=n.value.place, target=true_label})
+        table.insert(tac[current_method.id], {type="label", target=true_label})
         emit_statement(n.statement)
     end
 
     function emit_default(n)
         local default_label = operand.lb()
-        self.case_labels[#self.case_labels].default = default_label
-        table.insert(tac[self.method.id], {type="label", target=default_label})
+        case_labels[#case_labels].default = default_label
+        table.insert(tac[current_method.id], {type="label", target=default_label})
         emit_statement(n.statement)
     end
 
@@ -859,25 +860,25 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
         emit_expression(n.condition)
         n.place = load_operand_into_register(n.condition.place)
         local end_label = operand.lb()
-        local mark = #tac[self.method.id] + 1 -- horribly inefficient, will fix later
-        table.insert(self.case_labels, {})
-        table.insert(self.loop_labels, {update_lb=nil, end_lb=end_label})
+        local mark = #tac[current_method.id] + 1 -- horribly inefficient, will fix later
+        table.insert(case_labels, {})
+        table.insert(loop_labels, {update_lb=nil, end_lb=end_label})
         emit_block(n.block)
 
         -- handle the case labels
-        for _, labels in ipairs(self.case_labels[#self.case_labels]) do
-            table.insert(tac[self.method.id], mark, {type="cmp", first=n.place, second=labels.value})
-            table.insert(tac[self.method.id], mark + 1, {type="je", target=labels.target})
+        for _, labels in ipairs(case_labels[#case_labels]) do
+            table.insert(tac[current_method.id], mark, {type="cmp", first=n.place, second=labels.value})
+            table.insert(tac[current_method.id], mark + 1, {type="je", target=labels.target})
             mark = mark + 2
         end
-        if(self.case_labels[#self.case_labels].default) then
-            table.insert(tac[self.method.id], mark, {type="jmp", target=self.case_labels[#self.case_labels].default})
+        if(case_labels[#case_labels].default) then
+            table.insert(tac[current_method.id], mark, {type="jmp", target=case_labels[#case_labels].default})
         else
-            table.insert(tac[self.method.id], mark, {type="jmp", target=end_label})
+            table.insert(tac[current_method.id], mark, {type="jmp", target=end_label})
         end
-        table.insert(tac[self.method.id], {type="label", target=end_label})
-        table.remove(self.case_labels)
-        table.remove(self.loop_labels)
+        table.insert(tac[current_method.id], {type="label", target=end_label})
+        table.remove(case_labels)
+        table.remove(loop_labels)
     end
 
     -- function is_condition_simplifiable(n)
@@ -903,56 +904,56 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
         local true_label = operand.lb()
         local end_label = operand.lb()
         emit_bool_control_flow(n.condition[1], true_label, false_label) -- should handle this by checking whether the condition is logical or not
-        table.insert(tac[self.method.id], {type="label", target=true_label})
+        table.insert(tac[current_method.id], {type="label", target=true_label})
         emit_statement(n.true_case)
-        table.insert(tac[self.method.id], {type="jmp", target=end_label})
-        table.insert(tac[self.method.id], {type="label", target=false_label})
+        table.insert(tac[current_method.id], {type="jmp", target=end_label})
+        table.insert(tac[current_method.id], {type="label", target=false_label})
         if(n.false_case) then
             emit_statement(n.false_case)
         end
-        table.insert(tac[self.method.id], {type="label", target=end_label})
+        table.insert(tac[current_method.id], {type="label", target=end_label})
     end
 
     function emit_for(n)
         local start_label = operand.lb()
         local update_label = operand.lb()
         local end_label = operand.lb()
-        table.insert(self.loop_labels, {update_lb=update_label, end_lb=end_label})
+        table.insert(loop_labels, {update_lb=update_label, end_lb=end_label})
         if(node_check(n.initialization, "DECLARATION")) then
             emit_declaration(n.initialization)
         else
             emit_expression(n.initialization)
         end
-        table.insert(tac[self.method.id], {type="label", target=start_label})
+        table.insert(tac[current_method.id], {type="label", target=start_label})
         -- For optimization purposes, the condition's false and end labels are associated with the for loop itself
         local true_label = operand.lb()
         emit_bool_control_flow(n.condition[1], true_label, end_label)
-        table.insert(tac[self.method.id], {type="label", target=true_label})
+        table.insert(tac[current_method.id], {type="label", target=true_label})
         emit_statement(n.statement)
-        table.insert(tac[self.method.id], {type="label", target=update_label})
+        table.insert(tac[current_method.id], {type="label", target=update_label})
         emit_expression(n.update)
-        table.insert(tac[self.method.id], {type="jmp", target=start_label})
-        table.insert(tac[self.method.id], {type="label", target=end_label})
-        table.remove(self.loop_labels)
+        table.insert(tac[current_method.id], {type="jmp", target=start_label})
+        table.insert(tac[current_method.id], {type="label", target=end_label})
+        table.remove(loop_labels)
     end
 
     function emit_while(n)
         local start_label = operand.lb()
         local end_label = operand.lb()
-        table.insert(self.loop_labels, {update_lb=start_label, end_lb=end_label})
-        table.insert(tac[self.method.id], {type="label", target=start_label})
+        table.insert(loop_labels, {update_lb=start_label, end_lb=end_label})
+        table.insert(tac[current_method.id], {type="label", target=start_label})
         local true_label = operand.lb()
         emit_bool_control_flow(n.condition[1], true_label, end_label)
-        table.insert(tac[self.method.id], {type="label", target=true_label})
+        table.insert(tac[current_method.id], {type="label", target=true_label})
         emit_statement(n.statement)
-        table.insert(tac[self.method.id], {type="jmp", target=start_label})
-        table.insert(tac[self.method.id], {type="label", target=end_label})
-        table.remove(self.loop_labels)
+        table.insert(tac[current_method.id], {type="jmp", target=start_label})
+        table.insert(tac[current_method.id], {type="label", target=end_label})
+        table.remove(loop_labels)
     end
 
     function emit_break(n)
-        if(#self.loop_labels > 0) then
-            table.insert(tac[self.method.id], {type="jmp", target=self.loop_labels[#self.loop_labels].end_lb})
+        if(#loop_labels > 0) then
+            table.insert(tac[current_method.id], {type="jmp", target=loop_labels[#loop_labels].end_lb})
         else
             Diagnostics.submit(Message.error("Break statement must either be inside a loop or a switch statement", n.pos))
         end
@@ -960,14 +961,14 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
 
     function emit_continue(n)
         local update_lb = nil
-        local i = #self.loop_labels
+        local i = #loop_labels
         while(i > 0 and not update_lb) do
-            update_lb = self.loop_labels[i].update_lb
+            update_lb = loop_labels[i].update_lb
             i = i - 1
         end
 
         if(update_lb) then
-            table.insert(tac[self.method.id], {type="jmp", target=update_lb})
+            table.insert(tac[current_method.id], {type="jmp", target=update_lb})
         else
             Diagnostics.submit(Message.error("Continue statement must be within a loop", n.pos))
         end
@@ -981,9 +982,9 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
                 n.value.place = load_operand_into_register(n.value.place)
             end
 
-            table.insert(tac[self.method.id], {type="mov", source=n.value.place, dest=self.RETURN_REG}) -- TODO: change this to emit_move(). Not sure about side effects
+            table.insert(tac[current_method.id], {type="mov", source=n.value.place, dest=RETURN_REG}) -- TODO: change this to emit_move(). Not sure about side effects
         end
-        table.insert(tac[self.method.id], {type="jmp", target=operand.i(".exit_"..self.method.id)})
+        table.insert(tac[current_method.id], {type="jmp", target=operand.i(".exit_"..current_method.id)})
 
     end
 
@@ -996,10 +997,10 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
                 if(not reg_rvalue_operands[a.place.type] or a.place.type == "i") then
                     a.place = load_operand_into_register(a.place)
                 end
-                table.insert(tac[self.method.id], {type="push", target=a.place})
+                table.insert(tac[current_method.id], {type="push", target=a.place})
         
             else
-                emit_move(a.place, self.standard_function_arguments[i])
+                emit_move(a.place, standard_function_arguments[i])
             end
         end
     end
@@ -1023,13 +1024,13 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
 
             if(n[i-1].type == TOKEN_TYPES['+']) then
                 if(n.value_type.kind == Type.KINDS["POINTER"] or n.value_type.kind == Type.KINDS["ARRAY"]) then
-                    emit_abstract_add(n[i].place, n.place, self:sizeof(n.value_type.points_to))
+                    emit_abstract_add(n[i].place, n.place, IRVisitor:sizeof(n.value_type.points_to))
                 else
-                    table.insert(tac[self.method.id], {type="add", source = n[i].place, dest=n.place})
+                    table.insert(tac[current_method.id], {type="add", source = n[i].place, dest=n.place})
                 end
             else
                 
-                table.insert(tac[self.method.id], {type="sub", source = n[i].place, dest=n.place})
+                table.insert(tac[current_method.id], {type="sub", source = n[i].place, dest=n.place})
             end
         end
     end
@@ -1050,10 +1051,10 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
                 if(source.type == "vr") then
                     source = load_operand_into_register(source)
                 end
-                table.insert(tac[self.method.id], {type="mull", source=operand.i(size), dest=source})
+                table.insert(tac[current_method.id], {type="mull", source=operand.i(size), dest=source})
             end
         end
-        table.insert(tac[self.method.id], {type="add", source=source, dest=dest})
+        table.insert(tac[current_method.id], {type="add", source=source, dest=dest})
     end
 
     function emit_abstract_sub(source, dest, size)
@@ -1068,10 +1069,10 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
                 if(source.type == "vr") then
                     source = load_operand_into_register(source)
                 end
-                table.insert(tac[self.method.id], {type="mull", source=operand.i(size), dest=source})
+                table.insert(tac[current_method.id], {type="mull", source=operand.i(size), dest=source})
             end
         end
-        table.insert(tac[self.method.id], {type="sub", source=source, dest=dest})
+        table.insert(tac[current_method.id], {type="sub", source=source, dest=dest})
     end
 
     function emit_term(n)
@@ -1094,7 +1095,7 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
             end
 
             if(n[i-1].type == TOKEN_TYPES['*']) then
-                table.insert(tac[self.method.id], {type="mull", source = n[i].place, dest=n.place})
+                table.insert(tac[current_method.id], {type="mull", source = n[i].place, dest=n.place})
             elseif(n[i-1].type == TOKEN_TYPES['/']) then
                 -- if(n[i].place.type == "i") then
                 --     n[i].place = load_operand_into_register(n[i].place)
@@ -1146,7 +1147,7 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
         }
 
         for _, instruction in ipairs(instructions) do
-            table.insert(tac[self.method.id], instruction)
+            table.insert(tac[current_method.id], instruction)
         end
 
         return quotient, remainder
@@ -1187,7 +1188,7 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
         }
 
         for _, instruction in ipairs(instructions) do
-            table.insert(tac[self.method.id], instruction)
+            table.insert(tac[current_method.id], instruction)
         end
 
         return quotient, remainder
@@ -1208,13 +1209,13 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
             if(n.operator == "++") then
                 emit_unary_expression(n.child)
                 local next_reg = rvalue_operands[n.child.place.type] and n.child.place or load_operand_into_register(n.child.place)
-                emit_abstract_add(operand.i(1),next_reg, self:sizeof(n.child.value_type.points_to))
+                emit_abstract_add(operand.i(1),next_reg, IRVisitor:sizeof(n.child.value_type.points_to))
                 emit_move(next_reg, n.child.place)
                 n.place = next_reg
             elseif(n.operator == "--") then
                 emit_unary_expression(n.child)
                 local next_reg = rvalue_operands[n.child.place.type] and n.child.place or load_operand_into_register(n.child.place)
-                emit_abstract_sub(operand.i(1),next_reg, self:sizeof(n.child.value_type.points_to))
+                emit_abstract_sub(operand.i(1),next_reg, IRVisitor:sizeof(n.child.value_type.points_to))
                 emit_move(next_reg, n.child.place)
                 n.place = next_reg
             elseif(n.operator == "SIZEOF") then
@@ -1222,7 +1223,7 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
                     emit_cast_expression(n.child)
                 end
 
-                n.place = operand.i(self:sizeof(n.child.value_type))
+                n.place = operand.i(IRVisitor:sizeof(n.child.value_type))
             elseif(n.operator == "&") then
                 emit_cast_expression(n.child)
                 n.place = emit_address_of(n.child.place)
@@ -1236,13 +1237,13 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
                     n.place.value = 65536 - n.place.value
                 else
                     n.place = load_operand_into_register(n.child.place)
-                    table.insert(tac[self.method.id], {type="xor", source=operand.i(65535), dest=n.place}) -- take the two's complement
-                    table.insert(tac[self.method.id], {type="add", source=operand.i(1), dest=n.place})
+                    table.insert(tac[current_method.id], {type="xor", source=operand.i(65535), dest=n.place}) -- take the two's complement
+                    table.insert(tac[current_method.id], {type="add", source=operand.i(1), dest=n.place})
                 end
             elseif(n.operator == "~") then
                 emit_cast_expression(n.child)
                 n.place = load_operand_into_register(n.child.place)
-                table.insert(tac[self.method.id], {type="xor", source=operand.i(65535), dest=n.place})
+                table.insert(tac[current_method.id], {type="xor", source=operand.i(65535), dest=n.place})
             elseif(n.operator == "+") then
                 emit_cast_expression(n.child)
                 n.place = n.child.place
@@ -1262,9 +1263,9 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
         -- Retrieve the address of some memory location as an r value -> only lvalue types can be addressed
         local t = operand.t()
         if(mem_lvalue_operands[place.type]) then
-            table.insert(tac[self.method.id], {type="!get_address", target=place, dest=t})
+            table.insert(tac[current_method.id], {type="!get_address", target=place, dest=t})
         elseif(place.type == "pr") then
-            table.insert(tac[self.method.id], {type="mov", source=place, dest=t})
+            table.insert(tac[current_method.id], {type="mov", source=place, dest=t})
         elseif(place.type == "t") then
             return place -- for aggregate parameter passing
         else
@@ -1278,16 +1279,16 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
         -- Thus, it can only act on lvalue types: g, p, l, and pr
         local pr = operand.pr()
         if(not rvalue_operands[place.type]) then
-            table.insert(tac[self.method.id], {type="ld", source=place, dest=pr})
+            table.insert(tac[current_method.id], {type="ld", source=place, dest=pr})
         elseif(place.type == "vr" or place.type == "t") then
             local pr = copy_place(load_operand_into_register(place))
             pr.type = "pr"
             return pr
         elseif(place.type == "i") then
-            table.insert(tac[self.method.id], {type="mov", source=place, dest=pr})
+            table.insert(tac[current_method.id], {type="mov", source=place, dest=pr})
         else
             print(place.type)
-            print(tac[self.method.id][#tac[self.method.id]].type)
+            print(tac[current_method.id][#tac[current_method.id]].type)
             error("Internal compiler error: Invalid place type in emit_dereference")
         end
         return pr
@@ -1300,7 +1301,7 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
             if(indexer.type == "i") then
                 indexer = operand.i(indexer.value * size)
             end
-            table.insert(tac[self.method.id], {type="add3", source=pointer, dest=pr, offset = indexer})
+            table.insert(tac[current_method.id], {type="add3", source=pointer, dest=pr, offset = indexer})
             return pr
         else
             local t = emit_dereference(pointer)
@@ -1351,9 +1352,9 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
                 if(operation.type == "[") then
                     emit_expression(operation.value)
                     if(n.value_types[i-1].kind == Type.KINDS["POINTER"]) then
-                        n.place = emit_pointer_indexing(n.place, operation.value.place, self:sizeof(n.value_types[i]))
+                        n.place = emit_pointer_indexing(n.place, operation.value.place, IRVisitor:sizeof(n.value_types[i]))
                     else
-                        n.place = emit_indexing(n.place, operation.value.place, self:sizeof(n.value_types[i]))
+                        n.place = emit_indexing(n.place, operation.value.place, IRVisitor:sizeof(n.value_types[i]))
                     end
                 elseif(operation.type == "(") then
                     emit_argument_list(operation.value, n.place.is_standard_function)
@@ -1361,35 +1362,35 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
                     if(lvalue_operands[n.place.type]) then
                         n.place = load_operand_into_register(n.place)
                     end
-                    table.insert(tac[self.method.id], {type="call", target=n.place})
+                    table.insert(tac[current_method.id], {type="call", target=n.place})
                     if(not n.place.is_standard_function) then
-                        table.insert(tac[self.method.id], {type="add", source=operand.i(#operation.value), dest=self.STACK_POINTER}) -- destroy stack frame
+                        table.insert(tac[current_method.id], {type="add", source=operand.i(#operation.value), dest=STACK_POINTER}) -- destroy stack frame
                     end
                     if(n.value_types[i].kind ~= Type.KINDS["VOID"]) then
                         n.place = operand.t()
-                        emit_move(self.RETURN_REG, n.place)
+                        emit_move(RETURN_REG, n.place)
                     end
                 elseif(operation.type == "++") then
                     local next_reg = load_operand_into_register(n.place)
                     if(reg_rvalue_operands[n.place.type]) then
-                        emit_abstract_add(operand.i(1), n.place, self:sizeof(n.value_types[i].points_to or n.value_types[i]))
+                        emit_abstract_add(operand.i(1), n.place, IRVisitor:sizeof(n.value_types[i].points_to or n.value_types[i]))
                         n.place = next_reg
                     else
                         local temp_reg = operand.t()
                         emit_move(next_reg, temp_reg)
-                        emit_abstract_add(operand.i(1), next_reg, self:sizeof(n.value_types[i].points_to or n.value_types[i]))
+                        emit_abstract_add(operand.i(1), next_reg, IRVisitor:sizeof(n.value_types[i].points_to or n.value_types[i]))
                         emit_move(next_reg, n.place)
                         n.place = temp_reg
                     end
                 elseif(operation.type == "--") then
                     local next_reg = load_operand_into_register(n.place)
                     if(reg_rvalue_operands[n.place.type]) then
-                        emit_abstract_sub(operand.i(1), n.place, self:sizeof(n.value_types[i].points_to or n.value_types[i]))
+                        emit_abstract_sub(operand.i(1), n.place, IRVisitor:sizeof(n.value_types[i].points_to or n.value_types[i]))
                         n.place = next_reg
                     else
                         local temp_reg = operand.t()
                         emit_move(next_reg, temp_reg)
-                        emit_abstract_sub(operand.i(1), next_reg, self:sizeof(n.value_types[i].points_to or n.value_types[i]))
+                        emit_abstract_sub(operand.i(1), next_reg, IRVisitor:sizeof(n.value_types[i].points_to or n.value_types[i]))
                         emit_move(next_reg, n.place)
                         n.place = temp_reg
                     end
@@ -1404,11 +1405,11 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
                     end
                     -- if(n.place.type ~= "pr") then
                     --     local next_reg = operand.pr()
-                    --     table.insert(tac[self.method.id], {type="!get_address", target=n.place, dest=next_reg})
+                    --     table.insert(tac[current_method.id], {type="!get_address", target=n.place, dest=next_reg})
                     --     n.place = next_reg
                     -- end
                     -- if(n.value_types[i-1].members[operation.value.id].offset > 0) then
-                    --     table.insert(tac[self.method.id], {type="add", source=operand.i(n.value_types[i-1].members[operation.value.id].offset), dest=n.place})
+                    --     table.insert(tac[current_method.id], {type="add", source=operand.i(n.value_types[i-1].members[operation.value.id].offset), dest=n.place})
                     -- end
                 elseif(operation.type == "->") then
                     -- dereference and then add the offset to the address
@@ -1416,14 +1417,14 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
                     n.place = emit_offset_lvalue(operand.i(n.value_types[i-1].points_to.members[operation.value.id].offset), n.place, 1)
                     -- if(not reg_rvalue_operands[n.place.type] and n.place.type ~= "pr") then
                     --     local next_reg = operand.pr() -- ? can this be a pr?
-                    --     table.insert(tac[self.method.id], {type="!get_address", target=n.place, dest=next_reg})
+                    --     table.insert(tac[current_method.id], {type="!get_address", target=n.place, dest=next_reg})
                     --     n.place = next_reg
                     -- end
                     
-                    -- table.insert(tac[self.method.id], {type="ld", source=n.place, dest=n.place})
+                    -- table.insert(tac[current_method.id], {type="ld", source=n.place, dest=n.place})
                     -- local offset = n.value_types[i-1].points_to.members[operation.value.id].offset
                     -- if(offset > 0) then
-                    --     table.insert(tac[self.method.id], {type="add", source=operand.i(offset), dest=n.place})
+                    --     table.insert(tac[current_method.id], {type="add", source=operand.i(offset), dest=n.place})
                     -- end
                 end
             end
@@ -1437,7 +1438,7 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
         assert(lvalue_operands[place.type] or place.type == "i", "place must be an lvalue")
         assert(offset.type == "i", "offset must be an immediate value")
         if(place.type == "pr") then
-            table.insert(tac[self.method.id], {type="add", source=operand.i(offset.value * size), dest=place})
+            table.insert(tac[current_method.id], {type="add", source=operand.i(offset.value * size), dest=place})
             return place
         else
             local mem_lvalue = copy_place(place)
@@ -1477,7 +1478,8 @@ function IRVisitor:generate_ir_code(ast, symbol_table)
 
     emit_program(ast)
 
-    return self, symbol_table
+    local code_result = {tac = tac, global_method = global_method, global = global, label = label, global_data = global_data, types = IRVisitor.types, method = current_method}
+    return code_result, symbol_table
 end
 
 return IRVisitor

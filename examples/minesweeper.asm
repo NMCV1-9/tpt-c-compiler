@@ -70,7 +70,7 @@ init:
     st r1,  term_nlchar
 
 start:
-    mov stack_pointer,8191
+    mov stack_pointer,4095
 	jmp __tptcc_fn_main
 __tptcc_fn___scan_signed_int:
 	push base_pointer

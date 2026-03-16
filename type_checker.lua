@@ -7,7 +7,7 @@ local Message = require("message")
 local Type_Checker = {}
 
 
-function Type_Checker:type_check(ast, symbol_table)
+function Type_Checker.type_check(ast, symbol_table)
     local base = Type.base
     local pointer = Type.pointer
     local array = Type.array

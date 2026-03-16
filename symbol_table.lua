@@ -1,12 +1,12 @@
 local Type = require("type")
+local util = require("util")
 local base = Type.base
 local pointer = Type.pointer
 local func = Type.func
 
 
--- Not sure if this is the proper way to do this, but I preload the standard library into the symbol table
-
-local symbol_table = {level=0, tag_symbols={}, ordinary_symbols={["NULL"]={type=Type.pointer(Type.base("VOID")), place={type="i",value=0}},
+local symbol_table = {}
+symbol_table.default_symbol_table = {level=0, tag_symbols={}, ordinary_symbols={["NULL"]={type=Type.pointer(Type.base("VOID")), place={type="i",value=0}},
     ["__print_unsigned_int"]={type=Type.func(Type.base("VOID"), {Type.base("INT")}), place={is_standard_function=true, type="i",value="__tptcc_fn_print_unsigned_int"}},
 ["__print_signed_int"]={type=Type.func(Type.base("VOID"), {Type.base("INT")}), place={is_standard_function=true, type="i",value="__tptcc_fn_print_signed_int"}},
 ["putchar"]={type=Type.func(Type.base("VOID"), {Type.base("CHAR")}), place={is_standard_function=true, type="i",value="__tptcc_fn_putchar"}},
@@ -48,9 +48,15 @@ local symbol_table = {level=0, tag_symbols={}, ordinary_symbols={["NULL"]={type=
 ["TERM_DEFAULT"]={type=Type.base("INT"), place={type="i",value=0x25}}}
 }
 
-symbol_table.current_scope = symbol_table
+
 symbol_table.tag = "t"
 symbol_table.ordinary = "o"
+
+symbol_table.__index = symbol_table
+
+function symbol_table.reset()
+    symbol_table.current_scope = util.deep_copy(symbol_table.default_symbol_table)
+end
 
 symbol_table.namespace_get = {
     [symbol_table.tag]=function(scope, id) return scope.tag_symbols[id] end,
@@ -117,5 +123,7 @@ function symbol_table.add_symbol(id, symbol, namespace)
     end
 end
     
+
+symbol_table.reset()
 
 return symbol_table
