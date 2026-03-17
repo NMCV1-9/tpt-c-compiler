@@ -11,6 +11,7 @@ symbol_table.default_symbol_table = {level=0, tag_symbols={}, ordinary_symbols={
 ["__print_signed_int"]={type=Type.func(Type.base("VOID"), {Type.base("INT")}), place={is_standard_function=true, type="i",value="__tptcc_fn_print_signed_int"}},
 ["putchar"]={type=Type.func(Type.base("VOID"), {Type.base("CHAR")}), place={is_standard_function=true, type="i",value="__tptcc_fn_putchar"}},
 ["getchar"]={type=Type.func(Type.base("CHAR"), {}), place={is_standard_function=true, type="i",value="__tptcc_fn_getchar"}},
+["getchar_nb"]={type=Type.func(Type.base("CHAR"), {}), place={is_standard_function=true, type="i",value="__tptcc_fn_getchar_nb"}},
 ["__scan_unsigned_int"]={type=Type.func(Type.base("VOID"), {Type.pointer(Type.base("INT"))}), place={is_standard_function=true, type="i",value="__tptcc_fn_scan_unsigned_int"}},
 ["set_colour"]={type=Type.func(Type.base("VOID"), {Type.base("INT"), Type.base("INT")}), place={is_standard_function=true, type="i",value="__tptcc_fn_set_colour"}},
 ["set_cursor"]={type=Type.func(Type.base("VOID"), {Type.base("INT"), Type.base("INT")}), place={is_standard_function=true, type="i",value="__tptcc_fn_set_cursor"}},
