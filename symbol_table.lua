@@ -118,6 +118,7 @@ function symbol_table.add_symbol(id, symbol, namespace)
         if(sym.is_prototype) then
             return
         end
+        -- Diagnostics.submit(Message.internal_error(string.format("Symbol '%s' has already been defined", id)))
         error(string.format("Symbol '%s' has already been defined", id))
     else
         symbol_table.set_symbol(id, symbol, namespace)

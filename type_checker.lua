@@ -169,6 +169,9 @@ function Type_Checker.type_check(ast, symbol_table)
                 local potential_symbol = get_symbol(declarator.id.id, symbol_table.ordinary)
                 if(potential_symbol) then
                     -- previous prototype
+                    if(not potential_symbol.is_prototype) then
+                        Diagnostics.submit(Message.error(string.format("Symbol '%s' is redefined", declarator.id.id), declarator.id.pos))
+                    end
                     potential_symbol.type = declarator.value_type
                 else
                     add_symbol(declarator.id.id, {type = declarator.value_type}, symbol_table.ordinary)
