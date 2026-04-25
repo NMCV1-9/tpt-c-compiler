@@ -135,7 +135,14 @@ end
 function CodeGen:generate(code, symbol_table)
     self.symbol_table = symbol_table
     self.ir = code
-    gen = [[
+    local gen = {code={}}
+    setmetatable(gen, {
+        __concat=function(a, b)
+            table.insert(a.code, b)
+            return a
+        end
+    })
+    gen = gen .. [[
 %include "common"
 
 %define return_reg r31
@@ -256,7 +263,9 @@ start:
         end
         for i, c in ipairs(c) do
             assert(c.type ~= nil, "Nil instruction")
-            gen = gen .. "\t" .. self.emission_map[c.type](c) .. "\n"
+            gen = gen .. "\t"
+            gen = gen .. self.emission_map[c.type](c)
+            gen = gen .. "\n"
         end
         -- emit epilogue
         gen = gen .. ".exit_" .. method_id .. ":\n"
@@ -279,7 +288,8 @@ start:
     -- print num + other util functions
     built_ins =string.gsub(Standard_Library.code, "%%(%d+)", {["1"]="r22", ["2"]="r23", ["3"]="r24", ["4"]="r25"})
 
-    return gen .. built_ins
+    gen = gen .. built_ins
+    return table.concat(gen.code, "")
 end
 
 function CodeGen:tac_to_string(tac)

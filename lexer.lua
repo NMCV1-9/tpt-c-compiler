@@ -53,12 +53,18 @@ function Lexer.lex(s)
 
     local processed_code = {}
     
+    local escape_map = {
+        ["'\\n'"] = 10,
+        ["'\\\\'"] = "'\\'"
+    }
+
+    local string_escape_map = {
+        ["\\n"] = "\n",
+        ["\\\\"] = "\\"
+    }
 
     function check_for_escape_sequence(ch)
-        local escape_map = {
-            ["'\\n'"] = 10,
-            ["'\\\\'"] = "'\\'"
-        }
+        
         if(escape_map[ch]) then
             return escape_map[ch]
         else
@@ -67,16 +73,13 @@ function Lexer.lex(s)
     end
 
     function check_for_escape_sequences_string(str)
-        local string_escape_map = {
-            ["\\n"] = "\n",
-            ["\\\\"] = "\\"
-        }
+        
         return str:gsub("\\.", function(ch) return string_escape_map[ch] end)
     end
 
     local new_lines = {0}
     for i=1, #s do
-        if(string.sub(s, i, i) == "\n") then
+        if(string.byte(s, i) == 10) then
             table.insert(new_lines, i)
         end
     end
