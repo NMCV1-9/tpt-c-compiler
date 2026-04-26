@@ -338,8 +338,45 @@ function IRVisitor.generate_ir_code(ast, symbol_table)
                 new_scope(current_method.id)
 
                 
-                for i, p in ipairs(declarator.direct_declarator.parameter_list or {}) do
-                    p.handle.place = operand.p(i-1)
+                for i, p in ipairs(declarator.direct_declarator.parameter_list or {}) do -- this is hell
+                    local param_place = operand.p(i-1)
+
+                    if aggregate_types[Type.INVERTED_KINDS[p.value_type.kind]] then -- since an pointer of an struct is pushed, the called function copies the data from that pointer into an copy in its stack frame.
+                        local ptr = operand.t()
+                        table.insert(tac[current_method.id], {type="ld", source=param_place, dest=ptr})
+
+                        local size = IRVisitor:sizeof(p.value_type)
+                        local local_copy = operand.l(size)
+
+                        for offset = 0, size - 1 do
+                            local src = operand.pr()
+                            local tmp = operand.t()
+
+                            table.insert(tac[current_method.id], {
+                                type="add3",
+                                source=ptr,
+                                dest=src,
+                                offset=operand.i(offset)
+                            })
+
+                            table.insert(tac[current_method.id], {
+                                type="ld",
+                                source=src,
+                                dest=tmp
+                            })
+
+                            local dest = Operand:new(local_copy.type, local_copy.value + offset)
+                            table.insert(tac[current_method.id], {
+                                type="st",
+                                source=tmp,
+                                dest=dest
+                            })
+                        end
+
+                        p.handle.place = local_copy
+                    else
+                        p.handle.place = param_place
+                    end
                 end
 
                 if(n.block) then
